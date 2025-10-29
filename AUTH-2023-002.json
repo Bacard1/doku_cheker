@@ -1,8 +1,11 @@
 {
   "authNumber": "AUTH-2023-002",
   "childName": "Nikolay Petrov",
-  "authorizedName": "Angela Grewsmühl",
-  "childEGN": "*************",
+  "authorizedName": "Berghoff & Angela Grewsmühl Systemmische Lösung",
   "issueDate": "29.10.2025",
-  "validUntil": "Keine"
+  "validUntil": "Keine",
+  "validInstitutions": [
+    "MARTINSCHULE, 57392 Schmallenberg",
+    "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg"
+  ]
 }
