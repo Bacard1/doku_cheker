@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка на пълномощно за дете</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .content {
+            padding: 25px;
+        }
+        
+        .scanner-section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        #scanner {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            overflow: hidden;
+        }
+        
+        .scanner-placeholder {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-stop {
+            background: #e74c3c;
+        }
+        
+        .btn-stop:hover {
+            background: #c0392b;
+        }
+        
+        .manual-input {
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .input-group {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        #authCodeInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 50px 0 0 50px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        #authCodeInput:focus {
+            border-color: #3498db;
+        }
+        
+        #checkManualBtn {
+            border-radius: 0 50px 50px 0;
+            padding: 12px 20px;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+        }
+        
+        .status {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .valid {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .invalid {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            width: 180px;
+            color: #495057;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #212529;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .demo-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f4fc;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .demo-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .demo-codes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .demo-code {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .demo-code:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            #authCodeInput {
+                border-radius: 50px;
+                margin-bottom: 10px;
+            }
+            
+            #checkManualBtn {
+                border-radius: 50px;
+            }
+            
+            .info-row {
+                flex-direction: column;
+            }
+            
+            .info-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Проверка на пълномощно за дете</h1>
+            <div class="subtitle">Сканирайте QR кода или въведете номера на пълномощното</div>
+        </header>
+        
+        <div class="content">
+            <div class="scanner-section">
+                <p>Сканирайте QR кода на пълномощното:</p>
+                <div id="scanner">
+                    <div class="scanner-placeholder">Сканерът ще се активира при натискане на бутона</div>
+                </div>
+                <button id="startScanner" class="btn">Стартирай сканер</button>
+                <button id="stopScanner" class="btn btn-stop hidden">Спри сканер</button>
+            </div>
+            
+            <div class="manual-input">
+                <p>Или въведете номера ръчно:</p>
+                <div class="input-group">
+                    <input type="text" id="authCodeInput" placeholder="Въведете номер на пълномощно">
+                    <button id="checkManualBtn" class="btn">Провери</button>
+                </div>
+            </div>
+            
+            <div id="result" class="result-section hidden">
+                <div class="status" id="statusMessage"></div>
+                
+                <div class="info-section">
+                    <div class="info-title">Информация за пълномощното</div>
+                    <div class="info-row">
+                        <div class="info-label">Номер на пълномощно:</div>
+                        <div class="info-value" id="authNumber">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Име на детето:</div>
+                        <div class="info-value" id="childName">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Име на пълномощника:</div>
+                        <div class="info-value" id="authorizedName">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">ЕГН на детето:</div>
+                        <div class="info-value" id="childEGN">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Дата на издаване:</div>
+                        <div class="info-value" id="issueDate">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Валидно до:</div>
+                        <div class="info-value" id="validUntil">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <div class="demo-title">Демонстрационни кодове за тестване:</div>
+                <div class="demo-codes">
+                    <div class="demo-code" data-code="AUTH-2023-001">AUTH-2023-001</div>
+                    <div class="demo-code" data-code="AUTH-2023-002">AUTH-2023-002</div>
+                    <div class="demo-code" data-code="AUTH-2024-010">AUTH-2024-010</div>
+                    <div class="demo-code" data-code="AUTH-2024-999">AUTH-2024-999</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            Система за проверка на пълномощни &copy; 2023
+        </footer>
+    </div>
+
+    <!-- Включване на библиотеката за сканиране на QR кодове -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.4/minified/html5-qrcode.min.js"></script>
+    
+    <script>
+        // Променливи за управление на сканера
+        let html5QrcodeScanner;
+        const scannerElement = document.getElementById('scanner');
+        const startScannerBtn = document.getElementById('startScanner');
+        const stopScannerBtn = document.getElementById('stopScanner');
+        const resultElement = document.getElementById('result');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        // Елементи за информация
+        const authNumberElement = document.getElementById('authNumber');
+        const childNameElement = document.getElementById('childName');
+        const authorizedNameElement = document.getElementById('authorizedName');
+        const childEGNElement = document.getElementById('childEGN');
+        const issueDateElement = document.getElementById('issueDate');
+        const validUntilElement = document.getElementById('validUntil');
+        
+        // Елементи за ръчно въвеждане
+        const authCodeInput = document.getElementById('authCodeInput');
+        const checkManualBtn = document.getElementById('checkManualBtn');
+        
+        // Зареждане на списъка с валидни пълномощни от GitHub
+        let validAuthorizations = [];
+        
+        async function loadValidAuthorizations() {
+            try {
+                // Замятете този URL с вашия GitHub RAW файл
+                const response = await fetch('https://raw.githubusercontent.com/your-username/your-repo/main/valid_authorizations.txt');
+                const text = await response.text();
+                
+                // Парсване на текстов файл - по един номер на ред
+                validAuthorizations = text.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0);
+                
+                console.log('Заредени валидни пълномощни:', validAuthorizations);
+            } catch (error) {
+                console.error('Грешка при зареждане на валидните пълномощни:', error);
+                // Ако не може да зареди файла, използваме тестови данни
+                validAuthorizations = [
+                    'AUTH-2023-001',
+                    'AUTH-2023-002',
+                    'AUTH-2023-005',
+                    'AUTH-2024-010',
+                    'AUTH-2024-015'
+                ];
+            }
+        }
+        
+        // Функция за стартиране на сканера
+        function startScanner() {
+            html5QrcodeScanner = new Html5Qrcode("scanner");
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                onScanSuccess,
+                onScanFailure
+            ).then(() => {
+                startScannerBtn.classList.add('hidden');
+                stopScannerBtn.classList.remove('hidden');
+                scannerElement.innerHTML = ''; // Премахваме placeholder
+            }).catch(err => {
+                console.error(err);
+                alert('Грешка при стартиране на сканера. Моля, уверете се, че имате камера и сте дали разрешение за достъп.');
+            });
+        }
+
+        // Функция за спиране на сканера
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    startScannerBtn.classList.remove('hidden');
+                    stopScannerBtn.classList.add('hidden');
+                    scannerElement.innerHTML = '<div class="scanner-placeholder">Сканерът ще се активира при натискане на бутона</div>';
+                }).catch(err => {
+                    console.error('Грешка при спиране на сканера:', err);
+                });
+            }
+        }
+
+        // Функция при успешно сканиране
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log(`Сканиран код: ${decodedText}`);
+            
+            // Проверка на валидността
+            checkAuthorization(decodedText);
+            
+            // Спираме сканера след успешно сканиране
+            stopScanner();
+        }
+
+        // Функция при неуспешно сканиране
+        function onScanFailure(error) {
+            // Обикновено не правим нищо при неуспешно сканиране
+        }
+
+        // Функция за проверка на пълномощното
+        function checkAuthorization(authCode) {
+            // Показваме резултата
+            resultElement.classList.remove('hidden');
+            
+            // Попълваме основна информация
+            authNumberElement.textContent = authCode;
+            
+            // Проверяваме дали кода е в списъка с валидни
+            const isValid = validAuthorizations.includes(authCode);
+            
+            if (isValid) {
+                statusMessage.textContent = "✅ Пълномощното е ВАЛИДНО";
+                statusMessage.className = "status valid";
+                
+                // Генерираме примерна информация за валидно пълномощно
+                childNameElement.textContent = "Мария Иванова Петрова";
+                authorizedNameElement.textContent = "Георги Димитров Стоянов";
+                childEGNElement.textContent = "1234567890";
+                issueDateElement.textContent = "15.05.2023";
+                validUntilElement.textContent = "15.05.2024";
+            } else {
+                statusMessage.textContent = "❌ Пълномощното е НЕВАЛИДНО";
+                statusMessage.className = "status invalid";
+                
+                // Изчистваме информацията за невалидно пълномощно
+                childNameElement.textContent = "-";
+                authorizedNameElement.textContent = "-";
+                childEGNElement.textContent = "-";
+                issueDateElement.textContent = "-";
+                validUntilElement.textContent = "-";
+            }
+            
+            // Скролваме до резултата
+            resultElement.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Инициализация при зареждане на страницата
+        window.addEventListener('load', () => {
+            loadValidAuthorizations();
+            
+            // Добавяне на event listeners
+            startScannerBtn.addEventListener('click', startScanner);
+            stopScannerBtn.addEventListener('click', stopScanner);
+            
+            // Проверка при ръчно въвеждане
+            checkManualBtn.addEventListener('click', () => {
+                const code = authCodeInput.value.trim();
+                if (code) {
+                    checkAuthorization(code);
+                    authCodeInput.value = '';
+                } else {
+                    alert('Моля, въведете номер на пълномощно');
+                }
+            });
+            
+            // Проверка при натискане на Enter в полето за въвеждане
+            authCodeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkManualBtn.click();
+                }
+            });
+            
+            // Добавяне на функционалност за демонстрационните кодове
+            document.querySelectorAll('.demo-code').forEach(codeElement => {
+                codeElement.addEventListener('click', () => {
+                    const code = codeElement.getAttribute('data-code');
+                    authCodeInput.value = code;
+                    checkAuthorization(code);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
