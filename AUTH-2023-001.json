@@ -3,7 +3,11 @@
   "childName": "Anna Müller",
   "authorizedName": "Thomas Schmidt",
   "authorizedDetails": "Onkel - berechtigt zur Teilnahme an Elternabenden",
-  "validInstitution": "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg",
+  "validInstitution": [
+    "MARTINSCHULE, 57392 Schmallenberg",
+    "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg",
+    "Stadtbücherei Schmallenberg, Oststraße 123"
+  ],
   "issueDate": "15.03.2023",
   "validUntil": "15.03.2024",
   "titleVollmacht": "Vollmacht für schulische Angelegenheiten"
