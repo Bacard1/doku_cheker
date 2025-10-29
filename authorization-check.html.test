@@ -185,32 +185,46 @@
             display: none;
         }
         
+        .demo-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f4fc;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .demo-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .demo-codes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .demo-code {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .demo-code:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
         .loading {
             text-align: center;
             padding: 20px;
             color: #666;
-        }
-        
-        .legal-info {
-            margin-top: 30px;
-            padding: 20px;
-            background: #fff3cd;
-            border-radius: 10px;
-            border: 1px solid #ffeaa7;
-            text-align: center;
-        }
-        
-        .legal-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #856404;
-        }
-        
-        .legal-text {
-            font-size: 14px;
-            color: #856404;
-            line-height: 1.5;
         }
         
         @media (max-width: 600px) {
@@ -294,11 +308,13 @@
                 Informationen werden geladen...
             </div>
             
-            <div class="legal-info">
-                <div class="legal-title">Rechtliche Hinweise:</div>
-                <div class="legal-text">
-                    Bestätigte Dokumente mit Status "GÜLTIG" sind von Denislav Pasev und Kristiana Belnikolova ausgefüllt und unterzeichnet.<br>
-                    Bei ungültigen Vollmachten behalten wir uns das Recht vor, Personen, die ungültige Vollmachten verwenden, zur Verantwortung zu ziehen!
+            <div class="demo-section">
+                <div class="demo-title">Demonstrationscodes zum Testen:</div>
+                <div class="demo-codes">
+                    <div class="demo-code" data-code="AUTH-2023-001">AUTH-2023-001</div>
+                    <div class="demo-code" data-code="AUTH-2023-002">AUTH-2023-002</div>
+                    <div class="demo-code" data-code="AUTH-2024-010">AUTH-2024-010</div>
+                    <div class="demo-code" data-code="AUTH-2024-999">AUTH-2024-999</div>
                 </div>
             </div>
         </div>
@@ -465,6 +481,15 @@
                 if (e.key === 'Enter') {
                     checkBtn.click();
                 }
+            });
+            
+            // Demonstrationscodes
+            document.querySelectorAll('.demo-code').forEach(codeElement => {
+                codeElement.addEventListener('click', () => {
+                    const code = codeElement.getAttribute('data-code');
+                    authCodeInput.value = code;
+                    checkAuthorization(code);
+                });
             });
         });
     </script>
