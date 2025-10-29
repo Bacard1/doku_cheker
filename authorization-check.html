@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Проверка на пълномощно за дете</title>
+    <title>Überprüfung der Vollmacht</title>
     <style>
         * {
             box-sizing: border-box;
@@ -149,13 +149,36 @@
         
         .info-label {
             font-weight: bold;
-            width: 180px;
+            width: 200px;
             color: #495057;
         }
         
         .info-value {
             flex: 1;
             color: #212529;
+        }
+        
+        .institution-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .institution-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .institution-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .institution-list li::before {
+            content: "•";
+            color: #3498db;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
         }
         
         .hidden {
@@ -232,7 +255,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Überprüfung der Gültigkeit einer Vollmacht / Schweigepflichtentbindung</h1>
+            <h1>Überprüfung der Vollmacht</h1>
             <div class="subtitle">Bitte geben Sie die Nummer der Vollmacht zur Überprüfung ein</div>
         </header>
         
@@ -240,7 +263,7 @@
             <div class="input-section">
                 <p>Bitte geben Sie die Nummer der Vollmacht ein:</p>
                 <div class="input-group">
-                    <input type="text" id="authCodeInput" placeholder="Bitte geben Sie die Nummer der Vollmacht ein">
+                    <input type="text" id="authCodeInput" placeholder="Vollmacht-Nummer eingeben">
                     <button id="checkBtn" class="btn">Überprüfen</button>
                 </div>
             </div>
@@ -249,7 +272,7 @@
                 <div class="status" id="statusMessage"></div>
                 
                 <div class="info-section">
-                    <div class="info-title">Informationen zur Vollmacht</div>
+                    <div class="info-title" id="titleVollmacht">Informationen zur Vollmacht</div>
                     <div class="info-row">
                         <div class="info-label">Nummer der Vollmacht:</div>
                         <div class="info-value" id="authNumber">-</div>
@@ -261,6 +284,10 @@
                     <div class="info-row">
                         <div class="info-label">Name des Bevollmächtigten:</div>
                         <div class="info-value" id="authorizedName">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Details zum Bevollmächtigten:</div>
+                        <div class="info-value" id="authorizedDetails">-</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Als Vorbild dienen:</div>
@@ -294,22 +321,24 @@
     </div>
 
     <script>
-        // Елементи
+        // Elemente
         const authCodeInput = document.getElementById('authCodeInput');
         const checkBtn = document.getElementById('checkBtn');
         const resultElement = document.getElementById('result');
         const statusMessage = document.getElementById('statusMessage');
         const loadingElement = document.getElementById('loading');
         
-        // Елементи за информация
+        // Elemente für Informationen
         const authNumberElement = document.getElementById('authNumber');
         const childNameElement = document.getElementById('childName');
         const authorizedNameElement = document.getElementById('authorizedName');
-        const childEGNElement = document.getElementById('childEGN');
+        const authorizedDetailsElement = document.getElementById('authorizedDetails');
+        const validInstitutionElement = document.getElementById('validInstitution');
         const issueDateElement = document.getElementById('issueDate');
         const validUntilElement = document.getElementById('validUntil');
+        const titleVollmachtElement = document.getElementById('titleVollmacht');
 
-        // Зареждане на списъка с валидни пълномощни
+        // Laden der Liste der gültigen Vollmachten
         let validAuthorizations = [];
         
         async function loadValidAuthorizations() {
@@ -321,112 +350,140 @@
                     .map(line => line.trim())
                     .filter(line => line.length > 0);
                 
-                console.log('Заредени валидни пълномощни:', validAuthorizations);
+                console.log('Geladene gültige Vollmachten:', validAuthorizations);
             } catch (error) {
-                console.error('Грешка при зареждане на валидните пълномощни:', error);
+                console.error('Fehler beim Laden der gültigen Vollmachten:', error);
                 validAuthorizations = ['AUTH-2023-001', 'AUTH-2023-002', 'AUTH-2024-010'];
             }
         }
         
-        // Зареждане на информация за конкретно пълномощно
+        // Laden der Informationen für eine bestimmte Vollmacht
         async function loadAuthorizationInfo(authCode) {
             try {
                 const response = await fetch(`https://raw.githubusercontent.com/Bacard1/doku_cheker/main/${authCode}.json`);
                 if (!response.ok) {
-                    throw new Error('Файлът не е намерен');
+                    throw new Error('Datei nicht gefunden');
                 }
                 return await response.json();
             } catch (error) {
-                console.error('Грешка при зареждане на информация:', error);
+                console.error('Fehler beim Laden der Informationen:', error);
                 return null;
             }
         }
 
-        // Функция за проверка на пълномощното
+        // Funktion zur Überprüfung der Vollmacht
         async function checkAuthorization(authCode) {
-            // Показваме loading
+            // Loading anzeigen
             loadingElement.classList.remove('hidden');
             resultElement.classList.add('hidden');
             
-            // Проверяваме дали кода е в списъка с валидни
+            // Prüfen, ob der Code in der Liste der gültigen Vollmachten ist
             const isValid = validAuthorizations.includes(authCode);
             
             if (isValid) {
-                // Зареждаме информацията от JSON файла
+                // Informationen aus der JSON-Datei laden
                 const authInfo = await loadAuthorizationInfo(authCode);
                 
-                // Скриваме loading
+                // Loading ausblenden
                 loadingElement.classList.add('hidden');
                 resultElement.classList.remove('hidden');
                 
                 if (authInfo) {
-                    statusMessage.textContent = "✅ Пълномощното е ВАЛИДНО";
+                    statusMessage.textContent = "✅ Die Vollmacht ist GÜLTIG";
                     statusMessage.className = "status valid";
                     
-                    // Попълваме информацията от JSON файла
+                    // Informationen aus der JSON-Datei füllen
                     authNumberElement.textContent = authInfo.authNumber || authCode;
                     childNameElement.textContent = authInfo.childName || '-';
                     authorizedNameElement.textContent = authInfo.authorizedName || '-';
-                    childEGNElement.textContent = authInfo.childEGN || '-';
+                    authorizedDetailsElement.textContent = authInfo.authorizedDetails || '-';
                     issueDateElement.textContent = authInfo.issueDate || '-';
                     validUntilElement.textContent = authInfo.validUntil || '-';
+                    
+                    // Titel der Vollmacht setzen
+                    if (authInfo.titleVollmacht) {
+                        titleVollmachtElement.textContent = authInfo.titleVollmacht;
+                    }
+                    
+                    // Institutionen anzeigen (Array oder String)
+                    if (Array.isArray(authInfo.validInstitution)) {
+                        // Wenn es ein Array ist - zeige als Liste an
+                        const institutionList = document.createElement('ul');
+                        institutionList.className = 'institution-list';
+                        
+                        authInfo.validInstitution.forEach(institution => {
+                            const li = document.createElement('li');
+                            li.textContent = institution;
+                            institutionList.appendChild(li);
+                        });
+                        
+                        validInstitutionElement.innerHTML = '';
+                        validInstitutionElement.appendChild(institutionList);
+                    } else {
+                        // Wenn es ein String ist - normal anzeigen
+                        validInstitutionElement.textContent = authInfo.validInstitution || '-';
+                        validInstitutionElement.innerHTML = ''; // Clear previous content
+                        validInstitutionElement.textContent = authInfo.validInstitution || '-';
+                    }
                 } else {
-                    statusMessage.textContent = "❌ Грешка при зареждане на информацията";
+                    statusMessage.textContent = "❌ Fehler beim Laden der Informationen";
                     statusMessage.className = "status invalid";
                     
-                    // Изчистваме информацията
+                    // Informationen löschen
                     clearAuthInfo();
                 }
             } else {
-                // Скриваме loading
+                // Loading ausblenden
                 loadingElement.classList.add('hidden');
                 resultElement.classList.remove('hidden');
                 
-                statusMessage.textContent = "❌ Пълномощното е НЕВАЛИДНО";
+                statusMessage.textContent = "❌ Die Vollmacht ist UNGÜLTIG";
                 statusMessage.className = "status invalid";
                 
-                // Изчистваме информацията
+                // Informationen löschen
                 clearAuthInfo();
                 authNumberElement.textContent = authCode;
             }
             
-            // Скролваме до резултата
+            // Zum Ergebnis scrollen
             resultElement.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Функция за изчистване на информацията
+        // Funktion zum Löschen der Informationen
         function clearAuthInfo() {
             authNumberElement.textContent = '-';
             childNameElement.textContent = '-';
             authorizedNameElement.textContent = '-';
-            childEGNElement.textContent = '-';
+            authorizedDetailsElement.textContent = '-';
+            validInstitutionElement.innerHTML = '-';
             issueDateElement.textContent = '-';
             validUntilElement.textContent = '-';
+            titleVollmachtElement.textContent = 'Informationen zur Vollmacht';
         }
 
-        // Инициализация при зареждане на страницата
+        // Initialisierung beim Laden der Seite
         window.addEventListener('load', () => {
             loadValidAuthorizations();
             
-            // Проверка при кликване на бутона
+            // Überprüfung beim Klicken des Buttons
             checkBtn.addEventListener('click', () => {
                 const code = authCodeInput.value.trim();
                 if (code) {
                     checkAuthorization(code);
                     authCodeInput.value = '';
                 } else {
-                    alert('Моля, въведете номер на пълномощно');
+                    alert('Bitte geben Sie eine Vollmacht-Nummer ein');
                 }
             });
             
-            // Проверка при натискане на Enter
+            // Überprüfung bei Enter-Taste
             authCodeInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     checkBtn.click();
                 }
             });
             
-            // Демонстрационни кодове
+            // Demonstrationscodes
             document.querySelectorAll('.demo-code').forEach(codeElement => {
                 codeElement.addEventListener('click', () => {
                     const code = codeElement.getAttribute('data-code');

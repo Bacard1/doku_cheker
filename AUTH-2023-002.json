@@ -1,11 +1,13 @@
 {
-  "authNumber": "AUTH-2023-002",
+  "authNumber": "AUTH-2023-001",
   "childName": "Nikolay Petrov",
-  "authorizedName": "Berghoff & Angela Grewsmühl Systemmische Lösung",
-  "issueDate": "29.10.2025",
-  "validUntil": "Keine",
-  "validInstitutions": [
+  "authorizedName": "BERGHOFF & GREWSMÜHL Systemische Lösungen",
+  "authorizedDetails": "Systemische Therapeutinnen DGSF & Supervision - Therapie · Coaching · Supervision. Kontakt: Angela Grewsmühl: 0171-3055943, Jutta Berghoff: 0171-3010877, E-Mail: therapie@systemischeloesungenbggbr.de",
+  "validInstitution": [
     "MARTINSCHULE, 57392 Schmallenberg",
-    "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg"
-  ]
+    "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg",
+  ],
+  "issueDate": "28.10.2023",
+  "validUntil": "28.10.2025",
+  "titleVollmacht": "Vollmacht für therapeutische Behandlung und Informationsaustausch"
 }
