@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vollmachten Verwaltung</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: var(--error-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .auth-list {
+            margin-top: 20px;
+        }
+        
+        .auth-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .auth-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .auth-number {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+        
+        .auth-title {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .auth-details {
+            margin-top: 10px;
+        }
+        
+        .auth-detail-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        
+        .auth-detail-label {
+            font-weight: bold;
+            width: 150px;
+        }
+        
+        .auth-detail-value {
+            flex: 1;
+        }
+        
+        .add-auth-form {
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .institution-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .institution-input input {
+            flex: 1;
+        }
+        
+        .institution-list {
+            margin-top: 10px;
+        }
+        
+        .institution-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        .empty-message {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .system-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="authorization-check.html" class="back-link">← Zurück zur Überprüfung</a>
+        
+        <header>
+            <h1>Vollmachten Verwaltung</h1>
+            <p class="description">Verwalten Sie die Datenbank der Vollmachten. Fügen Sie neue Vollmachten hinzu oder entfernen Sie bestehende.</p>
+        </header>
+        
+        <div class="system-notice">
+            <strong>⚠️ Hinweis:</strong> Alle Änderungen werden im lokalen Speicher des Browsers gespeichert. Die Daten bleiben erhalten, bis der Browser-Cache gelöscht wird.
+        </div>
+        
+        <div class="card">
+            <h2 class="section-title">Vorhandene Vollmachten</h2>
+            
+            <div id="auth-list" class="auth-list">
+                <!-- Vollmachten werden hier dynamisch geladen -->
+            </div>
+            
+            <div class="buttons-container">
+                <button type="button" class="btn btn-success" id="save-changes">Änderungen speichern</button>
+                <button type="button" class="btn btn-warning" id="reset-defaults">Standard wiederherstellen</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="section-title">Neue Vollmacht hinzufügen</h2>
+            
+            <div class="add-auth-form">
+                <div class="form-group">
+                    <label for="newAuthNumber">Vollmacht-Nummer *</label>
+                    <input type="text" id="newAuthNumber" placeholder="z.B. AUTH-2024-001" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newChildName">Name des Kindes *</label>
+                    <input type="text" id="newChildName" placeholder="Name des Kindes" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newAuthorizedName">Name des Bevollmächtigten *</label>
+                    <input type="text" id="newAuthorizedName" placeholder="Name des Bevollmächtigten" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newAuthorizedDetails">Details zum Bevollmächtigten</label>
+                    <textarea id="newAuthorizedDetails" placeholder="Kontaktdaten und weitere Informationen"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newTitleVollmacht">Titel der Vollmacht</label>
+                    <input type="text" id="newTitleVollmacht" placeholder="Titel der Vollmacht">
+                </div>
+                
+                <div class="form-group">
+                    <label>Gültige Institutionen</label>
+                    <div class="institution-input">
+                        <input type="text" id="newInstitution" placeholder="Name der Institution">
+                        <button type="button" class="btn btn-success btn-small" id="addInstitution">Hinzufügen</button>
+                    </div>
+                    <div id="institutionsList" class="institution-list">
+                        <!-- Institutionen werden hier angezeigt -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newIssueDate">Ausstellungsdatum</label>
+                    <input type="text" id="newIssueDate" placeholder="TT.MM.JJJJ">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newValidUntil">Gültig bis</label>
+                    <input type="text" id="newValidUntil" placeholder="TT.MM.JJJJ oder '-' für unbefristet">
+                </div>
+                
+                <button type="button" class="btn btn-success" id="addAuthBtn">Vollmacht hinzufügen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Standard-Datenbank der Vollmachten
+        const defaultAuthorizationDatabase = {
+            "AUTH-2023-001": {
+                "authNumber": "AUTH-2023-001",
+                "childName": "Nikolay Petrov",
+                "authorizedName": "BERGHOFF & GREWSMÜHL Systemische Lösungen",
+                "authorizedDetails": "Systemische Therapeutinnen DGSF & Supervision - Therapie · Coaching · Supervision. Kontakt: Angela Grewsmühl: 0171-3055943, Jutta Berghoff: 0171-3010877, E-Mail: therapie@systemischeloesungenbggbr.de",
+                "validInstitution": [
+                    "MARTINSCHULE, 57392 Schmallenberg",
+                    "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg"
+                ],
+                "issueDate": "28.10.2023",
+                "validUntil": "28.10.2025",
+                "titleVollmacht": "Vollmacht für therapeutische Behandlung und Informationsaustausch"
+            },
+            "AUTH-2025-001": {
+                "authNumber": "AUTH-2025-001",
+                "childName": "Nikolay Petrov",
+                "authorizedName": "BERGHOFF & GREWSMÜHL Systemische Lösungen",
+                "authorizedDetails": "Systemische Therapeutinnen DGSF & Supervision - Therapie · Coaching · Supervision. Kontakt: Angela Grewsmühl: 0171-3055943, Jutta Berghoff: 0171-3010877, E-Mail: therapie@systemischeloesungenbggbr.de",
+                "validInstitution": [
+                    "MARTINSCHULE, 57392 Schmallenberg",
+                    "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg"
+                ],
+                "issueDate": "28.10.2025",
+                "validUntil": "-",
+                "titleVollmacht": "Entbindung von der Schweigepflicht in Gegenseitigkeit - Gegenseitige Entbindung der Schweigepflicht zwischen Martinsschule (Schulleitung, Lehrkräfte, Schulsozialarbeiter) und Jugendamt, Tagesgruppen des Martinswerks, Jugendhilfemaßnahmen sowie Kinder- und Jugendpsychiatrie zur Gewährleistung professioneller Zusammenarbeit im Rahmen von Hilfsmaßnahmen"
+            }
+        };
+
+        let authorizationDatabase = {};
+        let currentInstitutions = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAuthorizationDatabase();
+            showAuthorizationList();
+            setupEventListeners();
+        });
+
+        function loadAuthorizationDatabase() {
+            const saved = localStorage.getItem('authorizationDatabase');
+            if (saved) {
+                authorizationDatabase = JSON.parse(saved);
+            } else {
+                authorizationDatabase = JSON.parse(JSON.stringify(defaultAuthorizationDatabase));
+            }
+        }
+
+        function saveAuthorizationDatabase() {
+            localStorage.setItem('authorizationDatabase', JSON.stringify(authorizationDatabase));
+        }
+
+        function showAuthorizationList() {
+            const authList = document.getElementById('auth-list');
+            authList.innerHTML = '';
+            
+            const authCodes = Object.keys(authorizationDatabase);
+            
+            if (authCodes.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-message';
+                emptyMessage.textContent = 'Keine Vollmachten vorhanden';
+                authList.appendChild(emptyMessage);
+                return;
+            }
+            
+            authCodes.forEach(authCode => {
+                const authInfo = authorizationDatabase[authCode];
+                const authItem = document.createElement('div');
+                authItem.className = 'auth-item';
+                
+                const authHeader = document.createElement('div');
+                authHeader.className = 'auth-header';
+                
+                const authNumber = document.createElement('div');
+                authNumber.className = 'auth-number';
+                authNumber.textContent = authInfo.authNumber;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-small';
+                removeBtn.textContent = 'Entfernen';
+                removeBtn.addEventListener('click', function() {
+                    if (confirm(`Sind Sie sicher, dass Sie die Vollmacht "${authInfo.authNumber}" entfernen möchten?`)) {
+                        removeAuthorization(authCode);
+                    }
+                });
+                
+                authHeader.appendChild(authNumber);
+                authHeader.appendChild(removeBtn);
+                
+                const authTitle = document.createElement('div');
+                authTitle.className = 'auth-title';
+                authTitle.textContent = authInfo.titleVollmacht || 'Ohne Titel';
+                
+                const authDetails = document.createElement('div');
+                authDetails.className = 'auth-details';
+                
+                // Kind Name
+                const childRow = document.createElement('div');
+                childRow.className = 'auth-detail-row';
+                childRow.innerHTML = `<div class="auth-detail-label">Kind:</div><div class="auth-detail-value">${authInfo.childName}</div>`;
+                authDetails.appendChild(childRow);
+                
+                // Bevollmächtigter
+                const authorizedRow = document.createElement('div');
+                authorizedRow.className = 'auth-detail-row';
+                authorizedRow.innerHTML = `<div class="auth-detail-label">Bevollmächtigter:</div><div class="auth-detail-value">${authInfo.authorizedName}</div>`;
+                authDetails.appendChild(authorizedRow);
+                
+                // Gültigkeitsdaten
+                const datesRow = document.createElement('div');
+                datesRow.className = 'auth-detail-row';
+                datesRow.innerHTML = `<div class="auth-detail-label">Gültig:</div><div class="auth-detail-value">${authInfo.issueDate} - ${authInfo.validUntil}</div>`;
+                authDetails.appendChild(datesRow);
+                
+                authItem.appendChild(authHeader);
+                authItem.appendChild(authTitle);
+                authItem.appendChild(authDetails);
+                
+                authList.appendChild(authItem);
+            });
+        }
+
+        function setupEventListeners() {
+            const saveChangesBtn = document.getElementById('save-changes');
+            const resetDefaultsBtn = document.getElementById('reset-defaults');
+            const addAuthBtn = document.getElementById('addAuthBtn');
+            const addInstitutionBtn = document.getElementById('addInstitution');
+            
+            saveChangesBtn.addEventListener('click', function() {
+                saveAuthorizationDatabase();
+                alert('Änderungen wurden gespeichert!');
+            });
+            
+            resetDefaultsBtn.addEventListener('click', function() {
+                if (confirm('Sind Sie sicher, dass Sie die Standard-Vollmachten wiederherstellen möchten? Alle eigenen Änderungen gehen verloren.')) {
+                    authorizationDatabase = JSON.parse(JSON.stringify(defaultAuthorizationDatabase));
+                    saveAuthorizationDatabase();
+                    showAuthorizationList();
+                    alert('Standard-Vollmachten wurden wiederhergestellt!');
+                }
+            });
+            
+            addInstitutionBtn.addEventListener('click', function() {
+                const institutionInput = document.getElementById('newInstitution');
+                const institution = institutionInput.value.trim();
+                
+                if (institution) {
+                    currentInstitutions.push(institution);
+                    updateInstitutionsList();
+                    institutionInput.value = '';
+                }
+            });
+            
+            addAuthBtn.addEventListener('click', function() {
+                addNewAuthorization();
+            });
+        }
+
+        function updateInstitutionsList() {
+            const institutionsList = document.getElementById('institutionsList');
+            institutionsList.innerHTML = '';
+            
+            currentInstitutions.forEach((institution, index) => {
+                const institutionItem = document.createElement('div');
+                institutionItem.className = 'institution-item';
+                
+                const institutionText = document.createElement('span');
+                institutionText.textContent = institution;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-small';
+                removeBtn.textContent = '×';
+                removeBtn.addEventListener('click', function() {
+                    currentInstitutions.splice(index, 1);
+                    updateInstitutionsList();
+                });
+                
+                institutionItem.appendChild(institutionText);
+                institutionItem.appendChild(removeBtn);
+                institutionsList.appendChild(institutionItem);
+            });
+        }
+
+        function addNewAuthorization() {
+            const authNumber = document.getElementById('newAuthNumber').value.trim();
+            const childName = document.getElementById('newChildName').value.trim();
+            const authorizedName = document.getElementById('newAuthorizedName').value.trim();
+            const authorizedDetails = document.getElementById('newAuthorizedDetails').value.trim();
+            const titleVollmacht = document.getElementById('newTitleVollmacht').value.trim();
+            const issueDate = document.getElementById('newIssueDate').value.trim();
+            const validUntil = document.getElementById('newValidUntil').value.trim();
+            
+            if (!authNumber || !childName || !authorizedName) {
+                alert('Bitte füllen Sie die mit * markierten Pflichtfelder aus.');
+                return;
+            }
+            
+            if (authorizationDatabase[authNumber]) {
+                alert('Eine Vollmacht mit dieser Nummer existiert bereits.');
+                return;
+            }
+            
+            authorizationDatabase[authNumber] = {
+                authNumber: authNumber,
+                childName: childName,
+                authorizedName: authorizedName,
+                authorizedDetails: authorizedDetails,
+                titleVollmacht: titleVollmacht,
+                validInstitution: [...currentInstitutions],
+                issueDate: issueDate,
+                validUntil: validUntil
+            };
+            
+            // Formular zurücksetzen
+            document.getElementById('newAuthNumber').value = '';
+            document.getElementById('newChildName').value = '';
+            document.getElementById('newAuthorizedName').value = '';
+            document.getElementById('newAuthorizedDetails').value = '';
+            document.getElementById('newTitleVollmacht').value = '';
+            document.getElementById('newIssueDate').value = '';
+            document.getElementById('newValidUntil').value = '';
+            currentInstitutions = [];
+            updateInstitutionsList();
+            
+            showAuthorizationList();
+            alert('Vollmacht wurde erfolgreich hinzugefügt!');
+        }
+
+        function removeAuthorization(authCode) {
+            delete authorizationDatabase[authCode];
+            showAuthorizationList();
+        }
+    </script>
+</body>
+</html>

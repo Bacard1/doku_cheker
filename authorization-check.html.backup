@@ -213,29 +213,6 @@
             line-height: 1.5;
         }
         
-        .qr-section {
-            margin-top: 20px;
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .qr-code {
-            margin: 15px auto;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            display: inline-block;
-        }
-        
-        .qr-instruction {
-            font-size: 14px;
-            color: #666;
-            margin-top: 10px;
-        }
-        
         @media (max-width: 600px) {
             .input-group {
                 flex-direction: column;
@@ -311,14 +288,6 @@
                         <div class="info-value" id="validUntil">-</div>
                     </div>
                 </div>
-
-                <div id="qrSection" class="qr-section hidden">
-                    <h3>QR-Code für diese Vollmacht</h3>
-                    <div id="qrCode" class="qr-code"></div>
-                    <div class="qr-instruction">
-                        Scannen Sie diesen QR-Code, um direkt zu dieser Vollmacht zu gelangen
-                    </div>
-                </div>
             </div>
             
             <div id="loading" class="loading hidden">
@@ -335,9 +304,6 @@
         </div>
     </div>
 
-    <!-- QR Code Generator Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-
     <script>
         // Elemente
         const authCodeInput = document.getElementById('authCodeInput');
@@ -345,8 +311,6 @@
         const resultElement = document.getElementById('result');
         const statusMessage = document.getElementById('statusMessage');
         const loadingElement = document.getElementById('loading');
-        const qrSection = document.getElementById('qrSection');
-        const qrCodeElement = document.getElementById('qrCode');
         
         // Elemente für Informationen
         const authNumberElement = document.getElementById('authNumber');
@@ -358,146 +322,115 @@
         const validUntilElement = document.getElementById('validUntil');
         const titleVollmachtElement = document.getElementById('titleVollmacht');
 
-        // Eingebettete Datenbank der Vollmachten
-        const authorizationDatabase = {
-            "AUTH-2023-001": {
-                "authNumber": "AUTH-2023-001",
-                "childName": "Nikolay Petrov",
-                "authorizedName": "BERGHOFF & GREWSMÜHL Systemische Lösungen",
-                "authorizedDetails": "Systemische Therapeutinnen DGSF & Supervision - Therapie · Coaching · Supervision. Kontakt: Angela Grewsmühl: 0171-3055943, Jutta Berghoff: 0171-3010877, E-Mail: therapie@systemischeloesungenbggbr.de",
-                "validInstitution": [
-                    "MARTINSCHULE, 57392 Schmallenberg",
-                    "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg"
-                ],
-                "issueDate": "28.10.2023",
-                "validUntil": "28.10.2025",
-                "titleVollmacht": "Vollmacht für therapeutische Behandlung und Informationsaustausch"
-            },
-            "AUTH-2025-001": {
-                "authNumber": "AUTH-2025-001",
-                "childName": "Nikolay Petrov",
-                "authorizedName": "BERGHOFF & GREWSMÜHL Systemische Lösungen",
-                "authorizedDetails": "Systemische Therapeutinnen DGSF & Supervision - Therapie · Coaching · Supervision. Kontakt: Angela Grewsmühl: 0171-3055943, Jutta Berghoff: 0171-3010877, E-Mail: therapie@systemischeloesungenbggbr.de",
-                "validInstitution": [
-                    "MARTINSCHULE, 57392 Schmallenberg",
-                    "Martinswerk e. V. Dorlar 28, 57392 Schmallenberg"
-                ],
-                "issueDate": "28.10.2025",
-                "validUntil": "-",
-                "titleVollmacht": "Entbindung von der Schweigepflicht in Gegenseitigkeit - Gegenseitige Entbindung der Schweigepflicht zwischen Martinsschule (Schulleitung, Lehrkräfte, Schulsozialarbeiter) und Jugendamt, Tagesgruppen des Martinswerks, Jugendhilfemaßnahmen sowie Kinder- und Jugendpsychiatrie zur Gewährleistung professioneller Zusammenarbeit im Rahmen von Hilfsmaßnahmen"
+        // Laden der Liste der gültigen Vollmachten
+        let validAuthorizations = [];
+        
+        async function loadValidAuthorizations() {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/Bacard1/doku_cheker/main/valid_authorizations.txt');
+                const text = await response.text();
+                
+                validAuthorizations = text.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0);
+                
+                console.log('Geladene gültige Vollmachten:', validAuthorizations);
+            } catch (error) {
+                console.error('Fehler beim Laden der gültigen Vollmachten:', error);
+                validAuthorizations = ['AUTH-2023-001', 'AUTH-2023-002', 'AUTH-2024-010'];
             }
-        };
-
-        // Absender-Informationen
-        const senderInfo = {
-            "senderName": "Denislav Pasev und Kristiana Belnikolova",
-            "senderAddress": "Musterstraße 123, 44141 Dortmund, Deutschland",
-            "senderPhone": "+49 15750800967",
-            "senderEmail": "pasevdenislav@gmail.de"
-        };
-
-        // Liste der gültigen Vollmachten
-        let validAuthorizations = Object.keys(authorizationDatabase);
-
-        // Funktion zur Erstellung des QR-Codes
-        function generateQRCode(authCode) {
-            const currentUrl = window.location.href.split('?')[0];
-            const authUrl = `${currentUrl}?auth=${encodeURIComponent(authCode)}`;
-            
-            qrCodeElement.innerHTML = '';
-            
-            QRCode.toCanvas(qrCodeElement, authUrl, {
-                width: 200,
-                height: 200,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            }, function(error) {
-                if (error) {
-                    console.error('QR Code generation error:', error);
-                    qrCodeElement.innerHTML = '<p>QR-Code konnte nicht generiert werden</p>';
+        }
+        
+        // Laden der Informationen für eine bestimmte Vollmacht
+        async function loadAuthorizationInfo(authCode) {
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/Bacard1/doku_cheker/main/${authCode}.json`);
+                if (!response.ok) {
+                    throw new Error('Datei nicht gefunden');
                 }
-            });
+                return await response.json();
+            } catch (error) {
+                console.error('Fehler beim Laden der Informationen:', error);
+                return null;
+            }
         }
 
         // Funktion zur Überprüfung der Vollmacht
-        function checkAuthorization(authCode) {
+        async function checkAuthorization(authCode) {
             // Loading anzeigen
             loadingElement.classList.remove('hidden');
             resultElement.classList.add('hidden');
-            qrSection.classList.add('hidden');
             
-            // Kurze Verzögerung für bessere UX
-            setTimeout(() => {
-                // Prüfen, ob der Code in der Datenbank existiert
-                const isValid = validAuthorizations.includes(authCode);
+            // Prüfen, ob der Code in der Liste der gültigen Vollmachten ist
+            const isValid = validAuthorizations.includes(authCode);
+            
+            if (isValid) {
+                // Informationen aus der JSON-Datei laden
+                const authInfo = await loadAuthorizationInfo(authCode);
                 
-                if (isValid) {
-                    // Informationen aus der Datenbank laden
-                    const authInfo = authorizationDatabase[authCode];
+                // Loading ausblenden
+                loadingElement.classList.add('hidden');
+                resultElement.classList.remove('hidden');
+                
+                if (authInfo) {
+                    statusMessage.textContent = "✅ Die Vollmacht ist GÜLTIG";
+                    statusMessage.className = "status valid";
                     
-                    // Loading ausblenden
-                    loadingElement.classList.add('hidden');
-                    resultElement.classList.remove('hidden');
+                    // Informationen aus der JSON-Datei füllen
+                    authNumberElement.textContent = authInfo.authNumber || authCode;
+                    childNameElement.textContent = authInfo.childName || '-';
+                    authorizedNameElement.textContent = authInfo.authorizedName || '-';
+                    authorizedDetailsElement.textContent = authInfo.authorizedDetails || '-';
+                    issueDateElement.textContent = authInfo.issueDate || '-';
+                    validUntilElement.textContent = authInfo.validUntil || '-';
                     
-                    if (authInfo) {
-                        statusMessage.textContent = "✅ Die Vollmacht ist GÜLTIG";
-                        statusMessage.className = "status valid";
+                    // Titel der Vollmacht setzen
+                    if (authInfo.titleVollmacht) {
+                        titleVollmachtElement.textContent = authInfo.titleVollmacht;
+                    }
+                    
+                    // Institutionen anzeigen (Array oder String)
+                    if (Array.isArray(authInfo.validInstitution)) {
+                        // Wenn es ein Array ist - zeige als Liste an
+                        const institutionList = document.createElement('ul');
+                        institutionList.className = 'institution-list';
                         
-                        // Informationen aus der Datenbank füllen
-                        authNumberElement.textContent = authInfo.authNumber || authCode;
-                        childNameElement.textContent = authInfo.childName || '-';
-                        authorizedNameElement.textContent = authInfo.authorizedName || '-';
-                        authorizedDetailsElement.textContent = authInfo.authorizedDetails || '-';
-                        issueDateElement.textContent = authInfo.issueDate || '-';
-                        validUntilElement.textContent = authInfo.validUntil || '-';
+                        authInfo.validInstitution.forEach(institution => {
+                            const li = document.createElement('li');
+                            li.textContent = institution;
+                            institutionList.appendChild(li);
+                        });
                         
-                        // Titel der Vollmacht setzen
-                        if (authInfo.titleVollmacht) {
-                            titleVollmachtElement.textContent = authInfo.titleVollmacht;
-                        }
-                        
-                        // Institutionen anzeigen (Array oder String)
-                        if (Array.isArray(authInfo.validInstitution)) {
-                            // Wenn es ein Array ist - zeige als Liste an
-                            const institutionList = document.createElement('ul');
-                            institutionList.className = 'institution-list';
-                            
-                            authInfo.validInstitution.forEach(institution => {
-                                const li = document.createElement('li');
-                                li.textContent = institution;
-                                institutionList.appendChild(li);
-                            });
-                            
-                            validInstitutionElement.innerHTML = '';
-                            validInstitutionElement.appendChild(institutionList);
-                        } else {
-                            // Wenn es ein String ist - normal anzeigen
-                            validInstitutionElement.textContent = authInfo.validInstitution || '-';
-                            validInstitutionElement.innerHTML = ''; // Clear previous content
-                            validInstitutionElement.textContent = authInfo.validInstitution || '-';
-                        }
-                        
-                        // QR-Code generieren
-                        generateQRCode(authCode);
-                        qrSection.classList.remove('hidden');
+                        validInstitutionElement.innerHTML = '';
+                        validInstitutionElement.appendChild(institutionList);
+                    } else {
+                        // Wenn es ein String ist - normal anzeigen
+                        validInstitutionElement.textContent = authInfo.validInstitution || '-';
+                        validInstitutionElement.innerHTML = ''; // Clear previous content
+                        validInstitutionElement.textContent = authInfo.validInstitution || '-';
                     }
                 } else {
-                    // Loading ausblenden
-                    loadingElement.classList.add('hidden');
-                    resultElement.classList.remove('hidden');
-                    
-                    statusMessage.textContent = "❌ Die Vollmacht ist UNGÜLTIG";
+                    statusMessage.textContent = "❌ Fehler beim Laden der Informationen";
                     statusMessage.className = "status invalid";
                     
                     // Informationen löschen
                     clearAuthInfo();
-                    authNumberElement.textContent = authCode;
                 }
+            } else {
+                // Loading ausblenden
+                loadingElement.classList.add('hidden');
+                resultElement.classList.remove('hidden');
                 
-                // Zum Ergebnis scrollen
-                resultElement.scrollIntoView({ behavior: 'smooth' });
-            }, 500);
+                statusMessage.textContent = "❌ Die Vollmacht ist UNGÜLTIG";
+                statusMessage.className = "status invalid";
+                
+                // Informationen löschen
+                clearAuthInfo();
+                authNumberElement.textContent = authCode;
+            }
+            
+            // Zum Ergebnis scrollen
+            resultElement.scrollIntoView({ behavior: 'smooth' });
         }
 
         // Funktion zum Löschen der Informationen
@@ -512,21 +445,9 @@
             titleVollmachtElement.textContent = 'Informationen zur Vollmacht';
         }
 
-        // Funktion zum Überprüfen der URL-Parameter
-        function checkUrlParameters() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const authParam = urlParams.get('auth');
-            
-            if (authParam) {
-                authCodeInput.value = authParam;
-                checkAuthorization(authParam);
-            }
-        }
-
         // Initialisierung beim Laden der Seite
         window.addEventListener('load', () => {
-            // URL-Parameter überprüfen
-            checkUrlParameters();
+            loadValidAuthorizations();
             
             // Überprüfung beim Klicken des Buttons
             checkBtn.addEventListener('click', () => {

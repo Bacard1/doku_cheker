@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorization Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+        
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .existing-records {
+            margin-top: 2rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--secondary-color);
+            margin-right: 10px;
+        }
+        
+        .action-btn.delete {
+            color: var(--accent-color);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .authorized-person {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .authorized-person input {
+            flex: 1;
+        }
+        
+        .remove-person {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 40px;
+            cursor: pointer;
+        }
+        
+        .document-preview {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: white;
+            min-height: 400px;
+        }
+        
+        .document-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .document-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .document-id {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .document-section {
+            margin-bottom: 20px;
+        }
+        
+        .document-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .signature-area {
+            margin-top: 50px;
+            text-align: right;
+        }
+        
+        .footer-note {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        
+        .amendments {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff9e6;
+            border-left: 4px solid #ffcc00;
+        }
+        
+        .amendments h3 {
+            color: #b38f00;
+            margin-bottom: 10px;
+        }
+        
+        .parent-names {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .parent-names input {
+            flex: 1;
+        }
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
+            
+            .document-preview {
+                border: none;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Authorization Manager</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="card no-print">
+            <h2>Create New Authorization</h2>
+            <form id="authorizationForm">
+                <div class="form-group">
+                    <label for="documentType">Document Type *</label>
+                    <select id="documentType" required>
+                        <option value="">Select Document Type</option>
+                        <option value="Entbindung von der Schweigepflicht">Entbindung von der Schweigepflicht</option>
+                        <option value="Vollmacht">Vollmacht</option>
+                        <option value="Einwilligung">Einwilligung</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="childName">Child's Name *</label>
+                    <select id="childName" required>
+                        <option value="">Select Child</option>
+                        <!-- Options will be populated from database -->
+                    </select>
+                    <input type="text" id="newChildName" placeholder="Or enter new child name" class="hidden">
+                </div>
+                
+                <div class="form-group">
+                    <label>Parent Names *</label>
+                    <div class="parent-names">
+                        <input type="text" id="parent1Name" placeholder="First Parent Name" required>
+                        <input type="text" id="parent2Name" placeholder="Second Parent Name">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Authorized Person(s) *</label>
+                    <div id="authorizedPersons">
+                        <div class="authorized-person">
+                            <input type="text" placeholder="Full Name" class="auth-name" required>
+                            <input type="tel" placeholder="Phone Number" class="auth-phone" required>
+                            <button type="button" class="remove-person hidden">-</button>
+                        </div>
+                    </div>
+                    <button type="button" id="addPerson" class="btn">Add Another Person</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="authorizedAddress">Authorized Person Address</label>
+                    <input type="text" id="authorizedAddress" placeholder="Street, City, Postal Code, Country">
+                </div>
+                
+                <div class="form-group">
+                    <label for="recipient">Recipient *</label>
+                    <input type="text" id="recipient" placeholder="Institution Name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="authorizedEntity">Authorized Entity/Person</label>
+                    <input type="text" id="authorizedEntity" placeholder="Name of authorized entity/person">
+                </div>
+                
+                <div class="form-group">
+                    <label for="authorizationDetails">Authorization Details</label>
+                    <textarea id="authorizationDetails" rows="3" placeholder="Details about the authorization"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="validUntil">Valid Until</label>
+                    <input type="text" id="validUntil" placeholder="e.g., Until the end of support needs">
+                </div>
+                
+                <div class="form-group">
+                    <label for="purpose">Purpose of Authorization</label>
+                    <textarea id="purpose" rows="3" placeholder="Purpose and scope of the authorization"></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn">Save Authorization</button>
+                    <button type="button" id="generatePdf" class="btn">Generate PDF</button>
+                    <button type="button" id="resetForm" class="btn btn-danger">Reset Form</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card existing-records no-print">
+            <h2>Existing Authorizations</h2>
+            <table id="recordsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Child Name</th>
+                        <th>Document Type</th>
+                        <th>Recipient</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Records will be populated from database -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card">
+            <h2>Document Preview</h2>
+            <div id="documentPreview" class="document-preview">
+                <!-- Document preview will be generated here -->
+            </div>
+            
+            <div class="amendments no-print" id="amendmentsSection" style="display: none;">
+                <h3>Amendments</h3>
+                <p>Add any changes or amendments to the original document:</p>
+                <textarea id="amendmentsText" rows="4" placeholder="Enter amendments here..."></textarea>
+                <div class="btn-group">
+                    <button type="button" id="saveAmendments" class="btn">Save Amendments</button>
+                    <button type="button" id="cancelAmendments" class="btn btn-danger">Cancel</button>
+                </div>
+            </div>
+            
+            <div class="btn-group no-print">
+                <button type="button" id="printDocument" class="btn">Print Document</button>
+                <button type="button" id="addAmendments" class="btn">Add Amendments</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database simulation using localStorage
+        const DB_KEYS = {
+            AUTHORIZATIONS: 'authorizations',
+            CHILDREN: 'children',
+            AUTH_PERSONS: 'authorized_persons',
+            PARENTS: 'parents',
+            COUNTER: 'id_counter'
+        };
+
+        // Initialize database if empty
+        function initializeDatabase() {
+            if (!localStorage.getItem(DB_KEYS.AUTHORIZATIONS)) {
+                localStorage.setItem(DB_KEYS.AUTHORIZATIONS, JSON.stringify([]));
+            }
+            
+            if (!localStorage.getItem(DB_KEYS.CHILDREN)) {
+                localStorage.setItem(DB_KEYS.CHILDREN, JSON.stringify([
+                    { id: 1, name: 'Nikolay Petrov' },
+                    { id: 2, name: 'Daniel Pasev' },
+                    { id: 3, name: 'Viktor Pasev' }
+                ]));
+            }
+            
+            if (!localStorage.getItem(DB_KEYS.AUTH_PERSONS)) {
+                localStorage.setItem(DB_KEYS.AUTH_PERSONS, JSON.stringify([
+                    { id: 1, name: 'Kristiana Belnikolova', phone: '+49 157 50800967' },
+                    { id: 2, name: 'Denislav Pasev', phone: '' }
+                ]));
+            }
+            
+            if (!localStorage.getItem(DB_KEYS.PARENTS)) {
+                localStorage.setItem(DB_KEYS.PARENTS, JSON.stringify([
+                    { id: 1, name: 'Kristiana Belnikolova' },
+                    { id: 2, name: 'Denislav Pasev' }
+                ]));
+            }
+            
+            if (!localStorage.getItem(DB_KEYS.COUNTER)) {
+                localStorage.setItem(DB_KEYS.COUNTER, JSON.stringify({
+                    year: new Date().getFullYear(),
+                    count: 1
+                }));
+            }
+        }
+
+        // Generate a unique ID in the format AUTH-YYYY-NNN
+        function generateAuthId() {
+            const currentYear = new Date().getFullYear();
+            const counterData = JSON.parse(localStorage.getItem(DB_KEYS.COUNTER));
+            
+            let id;
+            if (counterData.year === currentYear) {
+                id = `AUTH-${currentYear}-${String(counterData.count).padStart(3, '0')}`;
+                counterData.count++;
+            } else {
+                counterData.year = currentYear;
+                counterData.count = 1;
+                id = `AUTH-${currentYear}-001`;
+            }
+            
+            localStorage.setItem(DB_KEYS.COUNTER, JSON.stringify(counterData));
+            return id;
+        }
+
+        // Get all authorizations from database
+        function getAuthorizations() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.AUTHORIZATIONS));
+        }
+
+        // Save authorization to database
+        function saveAuthorization(authData) {
+            const authorizations = getAuthorizations();
+            authData.id = generateAuthId();
+            authData.createdAt = new Date().toISOString();
+            authData.isAmendment = false;
+            authorizations.push(authData);
+            localStorage.setItem(DB_KEYS.AUTHORIZATIONS, JSON.stringify(authorizations));
+            return authData.id;
+        }
+
+        // Save amended authorization
+        function saveAmendedAuthorization(originalId, amendments) {
+            const authorizations = getAuthorizations();
+            const originalAuth = authorizations.find(a => a.id === originalId);
+            
+            if (originalAuth) {
+                const amendedAuth = {
+                    ...originalAuth,
+                    amendments: amendments,
+                    amendedAt: new Date().toISOString(),
+                    isAmendment: true,
+                    originalId: originalId
+                };
+                
+                // Remove the original ID to avoid duplicates
+                delete amendedAuth.id;
+                amendedAuth.id = `${originalId}-AMEND`;
+                
+                authorizations.push(amendedAuth);
+                localStorage.setItem(DB_KEYS.AUTHORIZATIONS, JSON.stringify(authorizations));
+                return amendedAuth.id;
+            }
+            
+            return null;
+        }
+
+        // Get all children from database
+        function getChildren() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.CHILDREN));
+        }
+
+        // Add a new child to database
+        function addChild(childName) {
+            const children = getChildren();
+            const newChild = {
+                id: children.length > 0 ? Math.max(...children.map(c => c.id)) + 1 : 1,
+                name: childName
+            };
+            children.push(newChild);
+            localStorage.setItem(DB_KEYS.CHILDREN, JSON.stringify(children));
+            return newChild;
+        }
+
+        // Get all authorized persons from database
+        function getAuthPersons() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.AUTH_PERSONS));
+        }
+
+        // Add a new authorized person to database
+        function addAuthPerson(name, phone) {
+            const authPersons = getAuthPersons();
+            const newPerson = {
+                id: authPersons.length > 0 ? Math.max(...authPersons.map(p => p.id)) + 1 : 1,
+                name: name,
+                phone: phone
+            };
+            authPersons.push(newPerson);
+            localStorage.setItem(DB_KEYS.AUTH_PERSONS, JSON.stringify(authPersons));
+            return newPerson;
+        }
+
+        // Populate child dropdown
+        function populateChildDropdown() {
+            const childSelect = document.getElementById('childName');
+            const children = getChildren();
+            
+            childSelect.innerHTML = '<option value="">Select Child</option>';
+            children.forEach(child => {
+                const option = document.createElement('option');
+                option.value = child.name;
+                option.textContent = child.name;
+                childSelect.appendChild(option);
+            });
+        }
+
+        // Populate authorized persons
+        function populateAuthPersons() {
+            // This would typically populate a selection dropdown
+            // For now, we'll just use the existing input fields
+        }
+
+        // Populate records table
+        function populateRecordsTable() {
+            const tableBody = document.querySelector('#recordsTable tbody');
+            const authorizations = getAuthorizations();
+            
+            tableBody.innerHTML = '';
+            
+            if (authorizations.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="6" style="text-align: center;">No authorizations found</td>`;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            authorizations.forEach(auth => {
+                if (!auth.isAmendment) { // Only show original documents, not amendments
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${auth.id}</td>
+                        <td>${auth.childName}</td>
+                        <td>${auth.documentType}</td>
+                        <td>${auth.recipient}</td>
+                        <td>${new Date(auth.createdAt).toLocaleDateString('de-DE')}</td>
+                        <td>
+                            <button class="action-btn edit" data-id="${auth.id}">Edit</button>
+                            <button class="action-btn delete" data-id="${auth.id}">Delete</button>
+                            <button class="action-btn view" data-id="${auth.id}">View</button>
+                            <button class="action-btn pdf" data-id="${auth.id}">PDF</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.action-btn.edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const authId = this.getAttribute('data-id');
+                    editAuthorization(authId);
+                });
+            });
+            
+            document.querySelectorAll('.action-btn.delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const authId = this.getAttribute('data-id');
+                    deleteAuthorization(authId);
+                });
+            });
+            
+            document.querySelectorAll('.action-btn.view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const authId = this.getAttribute('data-id');
+                    viewAuthorization(authId);
+                });
+            });
+            
+            document.querySelectorAll('.action-btn.pdf').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const authId = this.getAttribute('data-id');
+                    generatePDF(authId);
+                });
+            });
+        }
+
+        // Edit authorization
+        function editAuthorization(authId) {
+            const authorizations = getAuthorizations();
+            const auth = authorizations.find(a => a.id === authId);
+            
+            if (auth) {
+                // Populate form with authorization data
+                document.getElementById('documentType').value = auth.documentType;
+                document.getElementById('childName').value = auth.childName;
+                document.getElementById('parent1Name').value = auth.parent1Name || '';
+                document.getElementById('parent2Name').value = auth.parent2Name || '';
+                document.getElementById('recipient').value = auth.recipient;
+                document.getElementById('authorizedEntity').value = auth.authorizedEntity || '';
+                document.getElementById('authorizationDetails').value = auth.authorizationDetails || '';
+                document.getElementById('validUntil').value = auth.validUntil || '';
+                document.getElementById('purpose').value = auth.purpose || '';
+                document.getElementById('authorizedAddress').value = auth.authorizedAddress || '';
+                
+                // Clear existing authorized persons
+                const authPersonsContainer = document.getElementById('authorizedPersons');
+                authPersonsContainer.innerHTML = '';
+                
+                // Add authorized persons
+                auth.authorizedPersons.forEach((person, index) => {
+                    const personDiv = document.createElement('div');
+                    personDiv.className = 'authorized-person';
+                    personDiv.innerHTML = `
+                        <input type="text" placeholder="Full Name" class="auth-name" value="${person.name}" required>
+                        <input type="tel" placeholder="Phone Number" class="auth-phone" value="${person.phone}" required>
+                        <button type="button" class="remove-person ${index === 0 ? 'hidden' : ''}">-</button>
+                    `;
+                    authPersonsContainer.appendChild(personDiv);
+                });
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-person').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        if (document.querySelectorAll('.authorized-person').length > 1) {
+                            this.parentElement.remove();
+                        }
+                    });
+                });
+                
+                // Update form submit to handle edit
+                const form = document.getElementById('authorizationForm');
+                form.onsubmit = function(e) {
+                    e.preventDefault();
+                    updateAuthorization(authId);
+                };
+                
+                // Scroll to form
+                document.querySelector('.card h2').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Update authorization
+        function updateAuthorization(authId) {
+            const authorizations = getAuthorizations();
+            const authIndex = authorizations.findIndex(a => a.id === authId);
+            
+            if (authIndex !== -1) {
+                const formData = getFormData();
+                authorizations[authIndex] = {
+                    ...authorizations[authIndex],
+                    ...formData,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                localStorage.setItem(DB_KEYS.AUTHORIZATIONS, JSON.stringify(authorizations));
+                populateRecordsTable();
+                generateDocumentPreview(authorizations[authIndex]);
+                
+                alert('Authorization updated successfully!');
+                
+                // Reset form submit handler
+                const form = document.getElementById('authorizationForm');
+                form.onsubmit = handleFormSubmit;
+            }
+        }
+
+        // Delete authorization
+        function deleteAuthorization(authId) {
+            if (confirm('Are you sure you want to delete this authorization?')) {
+                const authorizations = getAuthorizations();
+                const filteredAuths = authorizations.filter(a => a.id !== authId);
+                localStorage.setItem(DB_KEYS.AUTHORIZATIONS, JSON.stringify(filteredAuths));
+                populateRecordsTable();
+            }
+        }
+
+        // View authorization
+        function viewAuthorization(authId) {
+            const authorizations = getAuthorizations();
+            const auth = authorizations.find(a => a.id === authId);
+            
+            if (auth) {
+                generateDocumentPreview(auth);
+                document.getElementById('documentPreview').scrollIntoView({ behavior: 'smooth' });
+                
+                // Store current authorization ID for amendments
+                document.getElementById('documentPreview').setAttribute('data-auth-id', authId);
+            }
+        }
+
+        // Get form data
+        function getFormData() {
+            const authNames = document.querySelectorAll('.auth-name');
+            const authPhones = document.querySelectorAll('.auth-phone');
+            
+            const authorizedPersons = [];
+            for (let i = 0; i < authNames.length; i++) {
+                authorizedPersons.push({
+                    name: authNames[i].value,
+                    phone: authPhones[i].value
+                });
+            }
+            
+            return {
+                documentType: document.getElementById('documentType').value,
+                childName: document.getElementById('childName').value || document.getElementById('newChildName').value,
+                parent1Name: document.getElementById('parent1Name').value,
+                parent2Name: document.getElementById('parent2Name').value,
+                authorizedPersons: authorizedPersons,
+                authorizedAddress: document.getElementById('authorizedAddress').value,
+                recipient: document.getElementById('recipient').value,
+                authorizedEntity: document.getElementById('authorizedEntity').value,
+                authorizationDetails: document.getElementById('authorizationDetails').value,
+                validUntil: document.getElementById('validUntil').value,
+                purpose: document.getElementById('purpose').value
+            };
+        }
+
+        // Handle form submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const formData = getFormData();
+            
+            // Check if we need to add a new child
+            const childSelect = document.getElementById('childName');
+            const newChildInput = document.getElementById('newChildName');
+            
+            if (childSelect.value === '' && newChildInput.value !== '') {
+                addChild(newChildInput.value);
+                populateChildDropdown();
+            }
+            
+            // Save authorization to database
+            const authId = saveAuthorization(formData);
+            
+            // Update UI
+            populateRecordsTable();
+            generateDocumentPreview(formData);
+            
+            alert(`Authorization saved successfully with ID: ${authId}`);
+        }
+
+        // Generate document preview
+        function generateDocumentPreview(authData) {
+            const preview = document.getElementById('documentPreview');
+            
+            // Format authorized persons
+            const authPersonsHTML = authData.authorizedPersons.map(person => 
+                `<div>${person.name}${person.phone ? `, Tel: ${person.phone}` : ''}</div>`
+            ).join('');
+            
+            // Format parent names
+            const parentNames = [];
+            if (authData.parent1Name) parentNames.push(authData.parent1Name);
+            if (authData.parent2Name) parentNames.push(authData.parent2Name);
+            const parentsHTML = parentNames.join(' und ');
+            
+            preview.innerHTML = `
+                <div class="document-header">
+                    <div><strong>${parentsHTML}</strong></div>
+                    <div>${authData.authorizedAddress || 'Musterstraße 123, 44141 Dortmund, Deutschland'}</div>
+                    <div>Tel: ${authData.authorizedPersons[0].phone || '+49 157 50800967'}</div>
+                    <div>Email: pasevdenislav@gmail.com</div>
+                    <div>Datum: ${new Date().toLocaleDateString('de-DE')}</div>
+                </div>
+                
+                <div class="document-title">${authData.documentType}</div>
+                <div class="document-id">ID: ${authData.id || 'AUTH-2025-001'}</div>
+                
+                <div class="document-section">
+                    <div class="document-label">Mein Sohn: ${authData.childName}</div>
+                </div>
+                
+                <div class="document-section">
+                    <div class="document-label">An: ${authData.recipient}</div>
+                </div>
+                
+                <div class="document-section">
+                    <div class="document-label">Bevollmächtigte Person/Institution: ${authData.authorizedEntity || ''}</div>
+                    <div>Details zur Bevollmächtigung: ${authData.authorizationDetails || ''}</div>
+                </div>
+                
+                <div class="document-section">
+                    <div class="document-label">Autorisierte Personen:</div>
+                    ${authPersonsHTML}
+                </div>
+                
+                <div class="document-section">
+                    <div>Ausstellungsdatum: ${new Date().toLocaleDateString('de-DE')}</div>
+                    <div>Gültig bis: ${authData.validUntil || '-'}</div>
+                    <div>Art der Vollmacht: ${authData.purpose || ''}</div>
+                </div>
+                
+                <div class="document-section">
+                    <p>${authData.documentType === 'Entbindung von der Schweigepflicht' 
+                        ? 'Entbindung von der Schweigepflicht in Gegenseitigkeit - Gegenseitige Entbindung der Schweigepflicht zur Gewährleistung professioneller Zusammenarbeit im Rahmen von Hilfsmaßnahmen'
+                        : 'Die vorgenannte Vollmacht ist zum gegenwärtigen Zeitpunkt gültig und berechtigt zur Durchführung der darin beschriebenen Handlungen.'}</p>
+                </div>
+                
+                <div class="signature-area">
+                    <div>Mit freundlichen Grüßen</div>
+                    <div style="margin-top: 40px;">${parentsHTML}</div>
+                </div>
+                
+                <div class="footer-note">
+                    <div><strong>Widerrufsrecht und Datenschutz</strong></div>
+                    <p>Ich behalte mir das Recht vor, diese Einwilligung jederzeit schriftlich und mit sofortiger Wirkung zu widerrufen.</p>
+                    <p>Im Falle des Widerrufs verpflichten sich die oben genannten Stellen, alle personenbezogenen Daten gemäß der DSGVO zu behandeln und auf Anforderung hin die Löschung aller vorliegenden Daten zu bestätigen.</p>
+                </div>
+                
+                ${authData.amendments ? `
+                <div class="amendments">
+                    <h3>Änderungen / Amendments</h3>
+                    <p>${authData.amendments}</p>
+                    <p><em>Datum der Änderung: ${new Date(authData.amendedAt).toLocaleDateString('de-DE')}</em></p>
+                </div>
+                ` : ''}
+            `;
+            
+            // Store current authorization ID for amendments
+            if (authData.id) {
+                preview.setAttribute('data-auth-id', authData.id);
+            }
+        }
+
+        // Generate PDF
+        function generatePDF(authId = null) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let authData;
+            if (authId) {
+                const authorizations = getAuthorizations();
+                authData = authorizations.find(a => a.id === authId);
+            } else {
+                authData = getFormData();
+                authData.id = 'AUTH-2025-001';
+            }
+            
+            if (!authData) return;
+            
+            // Format parent names
+            const parentNames = [];
+            if (authData.parent1Name) parentNames.push(authData.parent1Name);
+            if (authData.parent2Name) parentNames.push(authData.parent2Name);
+            const parentsHTML = parentNames.join(' und ');
+            
+            // Add content to PDF
+            let yPosition = 20;
+            
+            // Header
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text(parentsHTML, 20, yPosition);
+            yPosition += 7;
+            
+            doc.setFont(undefined, 'normal');
+            doc.text(authData.authorizedAddress || 'Musterstraße 123, 44141 Dortmund, Deutschland', 20, yPosition);
+            yPosition += 7;
+            
+            doc.text(`Tel: ${authData.authorizedPersons[0].phone || '+49 157 50800967'}`, 20, yPosition);
+            yPosition += 7;
+            
+            doc.text('Email: pasevdenislav@gmail.com', 20, yPosition);
+            yPosition += 7;
+            
+            doc.text(`Datum: ${new Date().toLocaleDateString('de-DE')}`, 20, yPosition);
+            yPosition += 15;
+            
+            // Document title
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text(authData.documentType, 105, yPosition, { align: 'center' });
+            yPosition += 10;
+            
+            // Document ID
+            doc.setFontSize(12);
+            doc.text(`ID: ${authData.id || 'AUTH-2025-001'}`, 105, yPosition, { align: 'center' });
+            yPosition += 15;
+            
+            // Child name
+            doc.text(`Mein Sohn: ${authData.childName}`, 20, yPosition);
+            yPosition += 10;
+            
+            // Recipient
+            doc.text(`An: ${authData.recipient}`, 20, yPosition);
+            yPosition += 10;
+            
+            // Authorized entity
+            if (authData.authorizedEntity) {
+                doc.text(`Bevollmächtigte Person/Institution: ${authData.authorizedEntity}`, 20, yPosition);
+                yPosition += 7;
+            }
+            
+            if (authData.authorizationDetails) {
+                doc.text(`Details zur Bevollmächtigung: ${authData.authorizationDetails}`, 20, yPosition);
+                yPosition += 10;
+            }
+            
+            // Authorized persons
+            doc.text('Autorisierte Personen:', 20, yPosition);
+            yPosition += 7;
+            
+            authData.authorizedPersons.forEach(person => {
+                doc.text(`${person.name}${person.phone ? `, Tel: ${person.phone}` : ''}`, 20, yPosition);
+                yPosition += 7;
+            });
+            
+            yPosition += 5;
+            
+            // Dates and validity
+            doc.text(`Ausstellungsdatum: ${new Date().toLocaleDateString('de-DE')}`, 20, yPosition);
+            yPosition += 7;
+            
+            doc.text(`Gültig bis: ${authData.validUntil || '-'}`, 20, yPosition);
+            yPosition += 7;
+            
+            if (authData.purpose) {
+                doc.text(`Art der Vollmacht: ${authData.purpose}`, 20, yPosition);
+                yPosition += 10;
+            }
+            
+            // Main text
+            const mainText = authData.documentType === 'Entbindung von der Schweigepflicht' 
+                ? 'Entbindung von der Schweigepflicht in Gegenseitigkeit - Gegenseitige Entbindung der Schweigepflicht zur Gewährleistung professioneller Zusammenarbeit im Rahmen von Hilfsmaßnahmen'
+                : 'Die vorgenannte Vollmacht ist zum gegenwärtigen Zeitpunkt gültig und berechtigt zur Durchführung der darin beschriebenen Handlungen.';
+            
+            doc.text(mainText, 20, yPosition);
+            yPosition += 20;
+            
+            // Signature
+            doc.text('Mit freundlichen Grüßen', 20, yPosition);
+            yPosition += 20;
+            
+            doc.text(parentsHTML, 20, yPosition);
+            yPosition += 30;
+            
+            // Footer note
+            doc.setFont(undefined, 'bold');
+            doc.text('Widerrufsrecht und Datenschutz', 20, yPosition);
+            yPosition += 7;
+            
+            doc.setFont(undefined, 'normal');
+            const footerText = [
+                'Ich behalte mir das Recht vor, diese Einwilligung jederzeit schriftlich und mit sofortiger Wirkung zu widerrufen.',
+                'Im Falle des Widerrufs verpflichten sich die oben genannten Stellen, alle personenbezogenen Daten gemäß der DSGVO zu',
+                'behandeln und auf Anforderung hin die Löschung aller vorliegenden Daten zu bestätigen.'
+            ];
+            
+            footerText.forEach(line => {
+                doc.text(line, 20, yPosition);
+                yPosition += 7;
+            });
+            
+            // Amendments if any
+            if (authData.amendments) {
+                yPosition += 10;
+                doc.setFont(undefined, 'bold');
+                doc.text('Änderungen / Amendments', 20, yPosition);
+                yPosition += 7;
+                
+                doc.setFont(undefined, 'normal');
+                const amendmentsLines = doc.splitTextToSize(authData.amendments, 170);
+                doc.text(amendmentsLines, 20, yPosition);
+                yPosition += amendmentsLines.length * 7;
+                
+                doc.text(`Datum der Änderung: ${new Date(authData.amendedAt).toLocaleDateString('de-DE')}`, 20, yPosition);
+            }
+            
+            // Save the PDF
+            doc.save(`${authData.documentType.replace(/\s+/g, '_')}_${authData.id || 'AUTH-2025-001'}.pdf`);
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize database
+            initializeDatabase();
+            
+            // Populate dropdowns and table
+            populateChildDropdown();
+            populateAuthPersons();
+            populateRecordsTable();
+            
+            // Form submission handler
+            document.getElementById('authorizationForm').addEventListener('submit', handleFormSubmit);
+            
+            // Add authorized person button
+            document.getElementById('addPerson').addEventListener('click', function() {
+                const authPersonsContainer = document.getElementById('authorizedPersons');
+                const personDiv = document.createElement('div');
+                personDiv.className = 'authorized-person';
+                personDiv.innerHTML = `
+                    <input type="text" placeholder="Full Name" class="auth-name" required>
+                    <input type="tel" placeholder="Phone Number" class="auth-phone" required>
+                    <button type="button" class="remove-person">-</button>
+                `;
+                authPersonsContainer.appendChild(personDiv);
+                
+                // Add event listener to remove button
+                personDiv.querySelector('.remove-person').addEventListener('click', function() {
+                    if (document.querySelectorAll('.authorized-person').length > 1) {
+                        this.parentElement.remove();
+                    }
+                });
+            });
+            
+            // Generate PDF button
+            document.getElementById('generatePdf').addEventListener('click', function() {
+                generatePDF();
+            });
+            
+            // Reset form button
+            document.getElementById('resetForm').addEventListener('click', function() {
+                document.getElementById('authorizationForm').reset();
+                const authPersonsContainer = document.getElementById('authorizedPersons');
+                authPersonsContainer.innerHTML = `
+                    <div class="authorized-person">
+                        <input type="text" placeholder="Full Name" class="auth-name" required>
+                        <input type="tel" placeholder="Phone Number" class="auth-phone" required>
+                        <button type="button" class="remove-person hidden">-</button>
+                    </div>
+                `;
+                document.getElementById('documentPreview').innerHTML = '';
+            });
+            
+            // Child name dropdown change handler
+            document.getElementById('childName').addEventListener('change', function() {
+                const newChildInput = document.getElementById('newChildName');
+                if (this.value === '') {
+                    newChildInput.classList.remove('hidden');
+                } else {
+                    newChildInput.classList.add('hidden');
+                    newChildInput.value = '';
+                }
+            });
+            
+            // Print document button
+            document.getElementById('printDocument').addEventListener('click', function() {
+                window.print();
+            });
+            
+            // Add amendments button
+            document.getElementById('addAmendments').addEventListener('click', function() {
+                const authId = document.getElementById('documentPreview').getAttribute('data-auth-id');
+                if (authId) {
+                    document.getElementById('amendmentsSection').style.display = 'block';
+                    document.getElementById('amendmentsText').value = '';
+                    document.getElementById('amendmentsSection').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('Please view an existing authorization first before adding amendments.');
+                }
+            });
+            
+            // Save amendments button
+            document.getElementById('saveAmendments').addEventListener('click', function() {
+                const authId = document.getElementById('documentPreview').getAttribute('data-auth-id');
+                const amendmentsText = document.getElementById('amendmentsText').value;
+                
+                if (amendmentsText.trim() === '') {
+                    alert('Please enter amendments text.');
+                    return;
+                }
+                
+                const newAuthId = saveAmendedAuthorization(authId, amendmentsText);
+                
+                if (newAuthId) {
+                    // View the amended authorization
+                    viewAuthorization(newAuthId);
+                    document.getElementById('amendmentsSection').style.display = 'none';
+                    alert('Amendments saved successfully!');
+                    populateRecordsTable();
+                }
+            });
+            
+            // Cancel amendments button
+            document.getElementById('cancelAmendments').addEventListener('click', function() {
+                document.getElementById('amendmentsSection').style.display = 'none';
+            });
+            
+            // Generate initial preview with sample data
+            const sampleData = {
+                documentType: 'Entbindung von der Schweigepflicht',
+                childName: 'Nikolay Petrov',
+                parent1Name: 'Kristiana Belnikolova',
+                parent2Name: 'Denislav Pasev',
+                authorizedPersons: [
+                    { name: 'Kristiana Belnikolova', phone: '+49 157 50800967' }
+                ],
+                authorizedAddress: 'Musterstraße 123, 44141 Dortmund, Deutschland',
+                recipient: 'MARTINSCHULE, 57392 Schmallenberg',
+                authorizedEntity: 'BERGHOFF & GREWSMÜHL Systemische Lösungen',
+                authorizationDetails: 'Systemische Therapeutinnen DGSF & Supervision - Therapie · Coaching - Supervision.',
+                validUntil: '-',
+                purpose: 'Diese Vollmacht gilt bis zum Ende der Notwendigkeit der Unterstützung von Nikolay Petrov in der Schule.',
+                id: 'AUTH-2025-001'
+            };
+            
+            generateDocumentPreview(sampleData);
+        });
+    </script>
+</body>
+</html>
