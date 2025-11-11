@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор за ntfy известия</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .generator-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .generator-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-section, .preview-section {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .actions-container {
+            margin-top: 20px;
+        }
+        
+        .action-item {
+            background-color: #f9f9f9;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .action-title {
+            font-weight: bold;
+        }
+        
+        .remove-action {
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: var(--error-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .preview-code {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .examples-container {
+            margin-top: 30px;
+        }
+        
+        .example-item {
+            background-color: #f0f8ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .example-item:hover {
+            background-color: #e1f0ff;
+        }
+        
+        .example-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .example-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .manage-options-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: var(--card-color);
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        
+        .option-category {
+            margin-bottom: 30px;
+        }
+        
+        .option-items {
+            margin-top: 10px;
+        }
+        
+        .option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .option-item-content {
+            flex-grow: 1;
+        }
+        
+        .option-item-value {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .option-item-label {
+            color: #666;
+        }
+        
+        .add-option-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .add-option-form input {
+            flex: 1;
+        }
+        
+        .system-option {
+            background-color: #e8f4fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Генератор за ntfy известия от Home Assistant</h1>
+            <p class="description">Този инструмент ви помага да генерирате конфигурации за известия, изпращани от Home Assistant през интеграцията на ntfy.sh</p>
+            <button class="btn btn-secondary manage-options-btn" id="manage-options">Управление на опциите</button>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="basic">Основни настройки</div>
+            <div class="tab" data-tab="advanced">Разширени опции</div>
+            <div class="tab" data-tab="actions">Действия</div>
+        </div>
+        
+        <div class="generator-container">
+            <div class="form-section">
+                <div class="tab-content active" id="basic-tab">
+                    <h2 class="section-title">Основни настройки</h2>
+                    
+                    <div class="form-group">
+                        <label for="url">URL:</label>
+                        <select id="url">
+                            <option value="">Зареждане...</option>
+                        </select>
+                        <input type="text" id="custom-url" class="hidden" placeholder="Въведете персонализиран URL">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="method">Метод:</label>
+                        <select id="method">
+                            <option value="POST" selected>POST</option>
+                            <option value="PUT">PUT</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="title">Заглавие:</label>
+                        <select id="title">
+                            <option value="">Зареждане...</option>
+                        </select>
+                        <input type="text" id="custom-title" class="hidden" placeholder="Въведете персонализирано заглавие">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priority">Приоритет:</label>
+                        <select id="priority">
+                            <option value="">Зареждане...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tags">Тагове:</label>
+                        <select id="tags">
+                            <option value="">Зареждане...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Съобщение:</label>
+                        <textarea id="message" placeholder="Въведете съобщението на известието"></textarea>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="advanced-tab">
+                    <h2 class="section-title">Разширени опции</h2>
+                    
+                    <div class="form-group">
+                        <label for="icon">Икона:</label>
+                        <select id="icon">
+                            <option value="">Зареждане...</option>
+                        </select>
+                        <input type="text" id="custom-icon" class="hidden" placeholder="URL към икона">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="attach">Прикачен файл:</label>
+                        <select id="attach">
+                            <option value="">Зареждане...</option>
+                        </select>
+                        <input type="text" id="custom-attach" class="hidden" placeholder="URL към прикачен файл">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="click">URL за кликване:</label>
+                        <input type="text" id="click" placeholder="URL, който да се отвори при кликване">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topic">Топик (замяна):</label>
+                        <input type="text" id="topic" placeholder="Замяна на стандартния топик">
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="attachment_compress_image">
+                        <label for="attachment_compress_image">Компресиране на изображение (0-100):</label>
+                    </div>
+                    <input type="number" id="attachment_compress_image_value" min="0" max="100" class="hidden" placeholder="Стойност на JPEG качество">
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="attachment_compress_file">
+                        <label for="attachment_compress_file">Компресиране на файл (0-9):</label>
+                    </div>
+                    <input type="number" id="attachment_compress_file_value" min="0" max="9" class="hidden" placeholder="Ниво на zlib компресия">
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="attachment_resize_image">
+                        <label for="attachment_resize_image">Преоразмеряване на изображение:</label>
+                    </div>
+                    <input type="text" id="attachment_resize_image_value" class="hidden" placeholder="25% или 800px">
+                </div>
+                
+                <div class="tab-content" id="actions-tab">
+                    <h2 class="section-title">Действия</h2>
+                    <p>Добавете бутони за действие към вашето известие</p>
+                    
+                    <div class="actions-container" id="actions-container">
+                        <!-- Actions will be added here dynamically -->
+                    </div>
+                    
+                    <button type="button" class="btn" id="add-action">Добави действие</button>
+                </div>
+                
+                <div class="buttons-container">
+                    <button type="button" class="btn btn-success" id="generate">Генерирай конфигурация</button>
+                    <button type="button" class="btn btn-secondary" id="reset">Изчисти формата</button>
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <h2 class="section-title">Преглед на конфигурацията</h2>
+                <div class="preview-code" id="preview">
+                    Конфигурацията ще се появи тук след като кликнете на "Генерирай конфигурация"
+                </div>
+                
+                <div class="buttons-container">
+                    <button type="button" class="btn" id="download">Изтегли файл</button>
+                    <button type="button" class="btn btn-secondary" id="copy">Копирай в клипборда</button>
+                </div>
+                
+                <div class="examples-container">
+                    <h2 class="section-title">Готови примери</h2>
+                    
+                    <div class="example-item" data-example="1">
+                        <div class="example-title">Пример 1: Стандартно известие</div>
+                        <div class="example-description">Заглавие, тагове, приоритет и URL за кликване</div>
+                    </div>
+                    
+                    <div class="example-item" data-example="2">
+                        <div class="example-title">Пример 2: Прикачен файл</div>
+                        <div class="example-description">Прикачване на локален файл, компресия и промяна на името</div>
+                    </div>
+                    
+                    <div class="example-item" data-example="3">
+                        <div class="example-title">Пример 3: Действие "Преглед"</div>
+                        <div class="example-description">Бутон за отваряне на URL</div>
+                    </div>
+                    
+                    <div class="example-item" data-example="4">
+                        <div class="example-title">Пример 4: HTTP действие</div>
+                        <div class="example-description">Взаимодействие с Home Assistant чрез HTTP заявка</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модален прозорец за управление на опциите -->
+    <div id="options-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Управление на опциите</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div id="options-management">
+                <!-- Опциите ще се генерират динамично тук -->
+            </div>
+            
+            <div class="buttons-container">
+                <button type="button" class="btn btn-success" id="save-options">Запази промените</button>
+                <button type="button" class="btn btn-secondary" id="reset-options">Възстанови стандартните</button>
+                <button type="button" class="btn" id="close-modal">Затвори</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Основни данни за опциите
+        let optionsData = {
+            url: [
+                {value: "https://ntfy.sh/pasev_hass_all", label: "pasev_hass_all", system: true},
+                {value: "https://ntfy.sh/pasev_hass_service", label: "pasev_hass_service", system: true},
+                {value: "custom", label: "Друг URL", system: true}
+            ],
+            title: [
+                {value: "Home Assistant", label: "Home Assistant", system: true},
+                {value: "Home Assistant Service", label: "Home Assistant Service", system: true},
+                {value: "Сигурност", label: "Сигурност", system: true},
+                {value: "Мрежа", label: "Мрежа", system: true},
+                {value: "Устройства", label: "Устройства", system: true},
+                {value: "Автоматизации", label: "Автоматизации", system: true},
+                {value: "custom", label: "Друго заглавие", system: true}
+            ],
+            priority: [
+                {value: "min", label: "min - Минимален", system: true},
+                {value: "low", label: "low - Нисък", system: true},
+                {value: "default", label: "default - Стандартен", system: true},
+                {value: "high", label: "high - Висок", system: true},
+                {value: "urgent", label: "urgent - Спешен", system: true},
+                {value: "max", label: "max - Максимален", system: true}
+            ],
+            tags: [
+                {value: "", label: "-- Без таг --", system: true},
+                {value: "warning", label: "⚠️ warning", system: true},
+                {value: "globe_with_meridians", label: "🌐 globe_with_meridians", system: true},
+                {value: "house", label: "🏠 house", system: true},
+                {value: "bell", label: "🔔 bell", system: true},
+                {value: "information_source", label: "ℹ️ information_source", system: true},
+                {value: "white_check_mark", label: "✅ white_check_mark", system: true},
+                {value: "x", label: "❌ x", system: true},
+                {value: "rotating_light", label: "🚨 rotating_light", system: true},
+                {value: "dog", label: "🐶 dog", system: true}
+            ],
+            icon: [
+                {value: "", label: "-- Без икона --", system: true},
+                {value: "https://raw.githubusercontent.com/Bacard1/icon-set-project/refs/heads/main/IT/wlan.png", label: "WLAN икона", system: true},
+                {value: "https://home-assistant.io/images/favicon-192x192.png", label: "Home Assistant икона", system: true},
+                {value: "https://raw.githubusercontent.com/Bacard1/icon-set-project/refs/heads/main/5G.png", label: "5G икона", system: true},
+                {value: "custom", label: "Друг URL", system: true}
+            ],
+            attach: [
+                {value: "", label: "-- Без прикачен файл --", system: true},
+                {value: "https://raw.githubusercontent.com/Bacard1/icon-set-project/refs/heads/main/5G.png", label: "5G икона", system: true},
+                {value: "https://raw.githubusercontent.com/Bacard1/icon-set-project/refs/heads/main/IT/wlan.png", label: "WLAN икона", system: true},
+                {value: "/media/local/cam0_latest_detection.png", label: "Локална снимка от камера", system: true},
+                {value: "custom", label: "Друг URL", system: true}
+            ]
+        };
+
+        // Заредени опции от localStorage
+        let userOptions = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Заредете потребителските опции от localStorage
+            loadUserOptions();
+            
+            // Заредете всички опции
+            loadAllOptions();
+
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to current tab and content
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Custom input toggles
+            setupCustomInputToggle('url', 'custom-url');
+            setupCustomInputToggle('title', 'custom-title');
+            setupCustomInputToggle('icon', 'custom-icon');
+            setupCustomInputToggle('attach', 'custom-attach');
+            
+            // Checkbox toggles
+            setupCheckboxToggle('attachment_compress_image', 'attachment_compress_image_value');
+            setupCheckboxToggle('attachment_compress_file', 'attachment_compress_file_value');
+            setupCheckboxToggle('attachment_resize_image', 'attachment_resize_image_value');
+            
+            // Actions functionality
+            const actionsContainer = document.getElementById('actions-container');
+            const addActionButton = document.getElementById('add-action');
+            let actionCounter = 0;
+            
+            addActionButton.addEventListener('click', addAction);
+            
+            // Generate configuration
+            const generateButton = document.getElementById('generate');
+            const previewElement = document.getElementById('preview');
+            
+            generateButton.addEventListener('click', generateConfiguration);
+            
+            // Reset form
+            const resetButton = document.getElementById('reset');
+            resetButton.addEventListener('click', resetForm);
+            
+            // Copy to clipboard
+            const copyButton = document.getElementById('copy');
+            copyButton.addEventListener('click', copyToClipboard);
+            
+            // Download file
+            const downloadButton = document.getElementById('download');
+            downloadButton.addEventListener('click', downloadFile);
+            
+            // Examples
+            const exampleItems = document.querySelectorAll('.example-item');
+            exampleItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const exampleId = this.getAttribute('data-example');
+                    loadExample(exampleId);
+                });
+            });
+            
+            // Modal functionality
+            const modal = document.getElementById('options-modal');
+            const manageBtn = document.getElementById('manage-options');
+            const closeModal = document.querySelector('.close-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            const saveOptionsBtn = document.getElementById('save-options');
+            const resetOptionsBtn = document.getElementById('reset-options');
+            
+            manageBtn.addEventListener('click', function() {
+                showOptionsModal();
+            });
+            
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            closeModalBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            saveOptionsBtn.addEventListener('click', function() {
+                saveUserOptions();
+                modal.style.display = 'none';
+                loadAllOptions(); // Презареди опциите
+            });
+            
+            resetOptionsBtn.addEventListener('click', function() {
+                if (confirm('Сигурни ли сте, че искате да възстановите стандартните опции? Това ще изтрие всички ваши персонализирани опции.')) {
+                    resetUserOptions();
+                    loadAllOptions();
+                    showOptionsModal(); // Презареди модалния прозорец
+                }
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        function loadUserOptions() {
+            const saved = localStorage.getItem('ntfyUserOptions');
+            if (saved) {
+                userOptions = JSON.parse(saved);
+            }
+        }
+
+        function saveUserOptions() {
+            localStorage.setItem('ntfyUserOptions', JSON.stringify(userOptions));
+            alert('Опциите са запазени успешно!');
+        }
+
+        function resetUserOptions() {
+            userOptions = {};
+            localStorage.removeItem('ntfyUserOptions');
+            alert('Стандартните опции са възстановени!');
+        }
+
+        function loadAllOptions() {
+            Object.entries(optionsData).forEach(([field, defaultOptions]) => {
+                const userFieldOptions = userOptions[field] || [];
+                const allOptions = [...defaultOptions, ...userFieldOptions];
+                populateSelect(field, allOptions);
+            });
+        }
+
+        function populateSelect(field, options) {
+            const select = document.getElementById(field);
+            if (!select) {
+                console.error(`Select element with id '${field}' not found`);
+                return;
+            }
+            
+            select.innerHTML = '';
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.value;
+                optionElement.textContent = option.label;
+                select.appendChild(optionElement);
+            });
+        }
+
+        function showOptionsModal() {
+            const modal = document.getElementById('options-modal');
+            const optionsManagement = document.getElementById('options-management');
+            
+            optionsManagement.innerHTML = '';
+            
+            Object.entries(optionsData).forEach(([field, defaultOptions]) => {
+                const userFieldOptions = userOptions[field] || [];
+                const allOptions = [...defaultOptions, ...userFieldOptions];
+                
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'option-category';
+                
+                const categoryTitle = document.createElement('h3');
+                categoryTitle.textContent = getFieldDisplayName(field);
+                categoryDiv.appendChild(categoryTitle);
+                
+                // Списък с текущи опции
+                const optionsList = document.createElement('div');
+                optionsList.className = 'option-items';
+                
+                allOptions.forEach(option => {
+                    const optionItem = document.createElement('div');
+                    optionItem.className = `option-item ${option.system ? 'system-option' : ''}`;
+                    
+                    const optionContent = document.createElement('div');
+                    optionContent.className = 'option-item-content';
+                    
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'option-item-value';
+                    valueSpan.textContent = option.value;
+                    
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'option-item-label';
+                    labelSpan.textContent = ` - ${option.label}`;
+                    
+                    optionContent.appendChild(valueSpan);
+                    optionContent.appendChild(labelSpan);
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'btn btn-danger btn-small';
+                    removeBtn.textContent = 'Премахни';
+                    removeBtn.style.display = option.system ? 'none' : 'block';
+                    
+                    removeBtn.addEventListener('click', function() {
+                        removeUserOption(field, option.value);
+                        showOptionsModal(); // Презареди модалния прозорец
+                    });
+                    
+                    optionItem.appendChild(optionContent);
+                    optionItem.appendChild(removeBtn);
+                    optionsList.appendChild(optionItem);
+                });
+                
+                categoryDiv.appendChild(optionsList);
+                
+                // Форма за добавяне на нова опция
+                const addForm = document.createElement('div');
+                addForm.className = 'add-option-form';
+                
+                const valueInput = document.createElement('input');
+                valueInput.type = 'text';
+                valueInput.placeholder = 'Стойност (value)';
+                
+                const labelInput = document.createElement('input');
+                labelInput.type = 'text';
+                labelInput.placeholder = 'Етикет (label)';
+                
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.className = 'btn btn-success btn-small';
+                addBtn.textContent = 'Добави';
+                
+                addBtn.addEventListener('click', function() {
+                    const value = valueInput.value.trim();
+                    const label = labelInput.value.trim();
+                    
+                    if (value && label) {
+                        addUserOption(field, value, label);
+                        valueInput.value = '';
+                        labelInput.value = '';
+                        showOptionsModal(); // Презареди модалния прозорец
+                    } else {
+                        alert('Моля, попълнете и двете полета!');
+                    }
+                });
+                
+                addForm.appendChild(valueInput);
+                addForm.appendChild(labelInput);
+                addForm.appendChild(addBtn);
+                categoryDiv.appendChild(addForm);
+                
+                optionsManagement.appendChild(categoryDiv);
+            });
+            
+            modal.style.display = 'block';
+        }
+
+        function getFieldDisplayName(field) {
+            const names = {
+                url: 'URL адреси',
+                title: 'Заглавия',
+                priority: 'Приоритети',
+                tags: 'Тагове',
+                icon: 'Икони',
+                attach: 'Прикачени файлове'
+            };
+            return names[field] || field;
+        }
+
+        function addUserOption(field, value, label) {
+            if (!userOptions[field]) {
+                userOptions[field] = [];
+            }
+            
+            // Проверка за дублиране
+            const exists = userOptions[field].some(opt => opt.value === value);
+            if (exists) {
+                alert('Опция с такава стойност вече съществува!');
+                return;
+            }
+            
+            userOptions[field].push({ value, label, system: false });
+        }
+
+        function removeUserOption(field, value) {
+            if (userOptions[field]) {
+                userOptions[field] = userOptions[field].filter(opt => opt.value !== value);
+            }
+        }
+
+        // Останалите функции остават същите...
+        // [setupCustomInputToggle, setupCheckboxToggle, getCustomValue, addAction, generateConfiguration, resetForm, copyToClipboard, downloadFile, loadExample]
+        // ... (тези функции са идентични с предишния код)
+
+        // Helper функции
+        function setupCustomInputToggle(selectId, inputId) {
+            const select = document.getElementById(selectId);
+            const input = document.getElementById(inputId);
+            
+            select.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    input.classList.remove('hidden');
+                } else {
+                    input.classList.add('hidden');
+                }
+            });
+        }
+
+        function setupCheckboxToggle(checkboxId, inputId) {
+            const checkbox = document.getElementById(checkboxId);
+            const input = document.getElementById(inputId);
+            
+            checkbox.addEventListener('change', function() {
+                input.classList.toggle('hidden', !this.checked);
+            });
+        }
+
+        function getCustomValue(selectId, inputId) {
+            const select = document.getElementById(selectId);
+            const input = document.getElementById(inputId);
+            
+            if (select.value === 'custom') {
+                return input.value;
+            }
+            return select.value;
+        }
+
+        // Actions functionality
+        function addAction() {
+            actionCounter++;
+            const actionId = `action-${actionCounter}`;
+            
+            const actionItem = document.createElement('div');
+            actionItem.className = 'action-item';
+            actionItem.id = actionId;
+            
+            actionItem.innerHTML = `
+                <div class="action-header">
+                    <div class="action-title">Действие ${actionCounter}</div>
+                    <button type="button" class="remove-action" data-action="${actionId}">Премахни</button>
+                </div>
+                <div class="form-group">
+                    <label for="${actionId}-action">Тип действие:</label>
+                    <select id="${actionId}-action" class="action-type">
+                        <option value="view">Преглед (view)</option>
+                        <option value="http">HTTP заявка</option>
+                        <option value="broadcast">Излъчване (broadcast)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="${actionId}-label">Етикет:</label>
+                    <input type="text" id="${actionId}-label" class="action-label" placeholder="Текст на бутона">
+                </div>
+                <div class="form-group view-action">
+                    <label for="${actionId}-url">URL:</label>
+                    <input type="text" id="${actionId}-url" class="action-url" placeholder="URL за отваряне">
+                </div>
+                <div class="form-group http-action hidden">
+                    <label for="${actionId}-method">HTTP метод:</label>
+                    <select id="${actionId}-method" class="action-method">
+                        <option value="GET">GET</option>
+                        <option value="POST" selected>POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="form-group http-action hidden">
+                    <label for="${actionId}-headers">Заглавки:</label>
+                    <textarea id="${actionId}-headers" class="action-headers" placeholder='{"Authorization": "Bearer ...", "Content-Type": "application/json"}'></textarea>
+                </div>
+                <div class="form-group http-action hidden">
+                    <label for="${actionId}-body">Тяло:</label>
+                    <textarea id="${actionId}-body" class="action-body" placeholder='{"entity_id": "light.living_room"}'></textarea>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="${actionId}-clear" class="action-clear">
+                    <label for="${actionId}-clear">Изчисти известието при кликване</label>
+                </div>
+            `;
+            
+            actionsContainer.appendChild(actionItem);
+            
+            // Add event listener for action type change
+            const actionTypeSelect = document.getElementById(`${actionId}-action`);
+            actionTypeSelect.addEventListener('change', function() {
+                const actionItem = this.closest('.action-item');
+                const viewFields = actionItem.querySelectorAll('.view-action');
+                const httpFields = actionItem.querySelectorAll('.http-action');
+                
+                if (this.value === 'view') {
+                    viewFields.forEach(field => field.classList.remove('hidden'));
+                    httpFields.forEach(field => field.classList.add('hidden'));
+                } else if (this.value === 'http') {
+                    viewFields.forEach(field => field.classList.add('hidden'));
+                    httpFields.forEach(field => field.classList.remove('hidden'));
+                } else {
+                    viewFields.forEach(field => field.classList.add('hidden'));
+                    httpFields.forEach(field => field.classList.add('hidden'));
+                }
+            });
+            
+            // Add event listener for remove button
+            const removeButton = actionItem.querySelector('.remove-action');
+            removeButton.addEventListener('click', function() {
+                const actionId = this.getAttribute('data-action');
+                document.getElementById(actionId).remove();
+            });
+        }
+
+        // Generate configuration
+        function generateConfiguration() {
+            // Get values from form
+            const url = getCustomValue('url', 'custom-url');
+            const method = document.getElementById('method').value;
+            const title = getCustomValue('title', 'custom-title');
+            const priority = document.getElementById('priority').value;
+            const tags = document.getElementById('tags').value;
+            const message = document.getElementById('message').value;
+            const icon = getCustomValue('icon', 'custom-icon');
+            const attach = getCustomValue('attach', 'custom-attach');
+            const click = document.getElementById('click').value;
+            const topic = document.getElementById('topic').value;
+            
+            // Build configuration
+            let config = `url: "${url}"\n`;
+            config += `method: "${method}"\n`;
+            
+            // Headers
+            config += `headers:\n`;
+            if (title) config += `  Title: "${title}"\n`;
+            if (priority) config += `  Priority: "${priority}"\n`;
+            if (tags) config += `  Tags: "${tags}"\n`;
+            if (icon) config += `  Icon: "${icon}"\n`;
+            if (attach) config += `  Attach: "${attach}"\n`;
+            
+            // Payload
+            config += `payload: "${message.replace(/\n/g, '\\n')}"\n`;
+            
+            // Data section for advanced options
+            let dataSection = '';
+            if (click || topic || 
+                document.getElementById('attachment_compress_image').checked || 
+                document.getElementById('attachment_compress_file').checked || 
+                document.getElementById('attachment_resize_image').checked) {
+                
+                dataSection += `data:\n`;
+                if (click) dataSection += `  click: "${click}"\n`;
+                if (topic) dataSection += `  topic: "${topic}"\n`;
+                
+                if (document.getElementById('attachment_compress_image').checked) {
+                    const value = document.getElementById('attachment_compress_image_value').value;
+                    if (value) dataSection += `  attachment_compress_image: ${value}\n`;
+                }
+                
+                if (document.getElementById('attachment_compress_file').checked) {
+                    const value = document.getElementById('attachment_compress_file_value').value;
+                    if (value) dataSection += `  attachment_compress_file: ${value}\n`;
+                }
+                
+                if (document.getElementById('attachment_resize_image').checked) {
+                    const value = document.getElementById('attachment_resize_image_value').value;
+                    if (value) dataSection += `  attachment_resize_image: ${value}\n`;
+                }
+            }
+            
+            // Actions
+            const actionItems = document.querySelectorAll('.action-item');
+            if (actionItems.length > 0) {
+                if (!dataSection) dataSection = "data:\n";
+                dataSection += `  actions:\n`;
+                
+                actionItems.forEach(item => {
+                    const actionType = item.querySelector('.action-type').value;
+                    const label = item.querySelector('.action-label').value;
+                    const clear = item.querySelector('.action-clear').checked;
+                    
+                    dataSection += `    - action: ${actionType}\n`;
+                    dataSection += `      label: "${label}"\n`;
+                    
+                    if (clear) {
+                        dataSection += `      clear: true\n`;
+                    }
+                    
+                    if (actionType === 'view') {
+                        const url = item.querySelector('.action-url').value;
+                        if (url) dataSection += `      url: "${url}"\n`;
+                    } else if (actionType === 'http') {
+                        const method = item.querySelector('.action-method').value;
+                        const url = item.querySelector('.action-url').value;
+                        const headers = item.querySelector('.action-headers').value;
+                        const body = item.querySelector('.action-body').value;
+                        
+                        if (method) dataSection += `      method: ${method}\n`;
+                        if (url) dataSection += `      url: "${url}"\n`;
+                        if (headers) {
+                            dataSection += `      headers:\n`;
+                            try {
+                                const headersObj = JSON.parse(headers);
+                                for (const [key, value] of Object.entries(headersObj)) {
+                                    dataSection += `        ${key}: "${value}"\n`;
+                                }
+                            } catch (e) {
+                                dataSection += `        ${headers}\n`;
+                            }
+                        }
+                        if (body) dataSection += `      body: '${body}'\n`;
+                    }
+                });
+            }
+            
+            // Combine all sections
+            if (dataSection) {
+                config += `\n${dataSection}`;
+            }
+            
+            // Display configuration
+            document.getElementById('preview').textContent = config;
+        }
+
+        // Reset form
+        function resetForm() {
+            // Reset all selects to first option
+            const fields = ['url', 'title', 'priority', 'tags', 'icon', 'attach'];
+            fields.forEach(field => {
+                const select = document.getElementById(field);
+                if (select) select.selectedIndex = 0;
+            });
+            
+            // Hide all custom inputs
+            document.querySelectorAll('input[type="text"][id^="custom-"]').forEach(input => {
+                input.classList.add('hidden');
+                input.value = '';
+            });
+            
+            // Reset other inputs
+            document.getElementById('method').value = 'POST';
+            document.getElementById('message').value = '';
+            document.getElementById('click').value = '';
+            document.getElementById('topic').value = '';
+            
+            // Reset checkboxes
+            document.getElementById('attachment_compress_image').checked = false;
+            document.getElementById('attachment_compress_image_value').value = '';
+            document.getElementById('attachment_compress_image_value').classList.add('hidden');
+            
+            document.getElementById('attachment_compress_file').checked = false;
+            document.getElementById('attachment_compress_file_value').value = '';
+            document.getElementById('attachment_compress_file_value').classList.add('hidden');
+            
+            document.getElementById('attachment_resize_image').checked = false;
+            document.getElementById('attachment_resize_image_value').value = '';
+            document.getElementById('attachment_resize_image_value').classList.add('hidden');
+            
+            // Remove all actions
+            document.getElementById('actions-container').innerHTML = '';
+            actionCounter = 0;
+            
+            document.getElementById('preview').textContent = 'Конфигурацията ще се появи тук след като кликнете на "Генерирай конфигурация"';
+        }
+
+        // Copy to clipboard
+        function copyToClipboard() {
+            const text = document.getElementById('preview').textContent;
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Конфигурацията е копирана в клипборда!');
+            }, function(err) {
+                console.error('Грешка при копиране: ', err);
+            });
+        }
+
+        // Download file
+        function downloadFile() {
+            const text = document.getElementById('preview').textContent;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ntfy_configuration.yaml';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Examples
+        function loadExample(exampleId) {
+            // Reset form first
+            resetForm();
+            
+            // Wait for form to reset and data to load
+            setTimeout(() => {
+                switch(exampleId) {
+                    case '1':
+                        // Example 1: Standard notification
+                        document.getElementById('title').value = 'Home Assistant Notification';
+                        document.getElementById('priority').value = 'high';
+                        document.getElementById('tags').value = 'door';
+                        document.getElementById('message').value = 'Terrace door is open';
+                        document.getElementById('click').value = 'https://myhomassistant.domain.tld';
+                        document.getElementById('topic').value = 'myothertopic';
+                        break;
+                        
+                    case '2':
+                        // Example 2: Attached file
+                        document.getElementById('title').value = 'Home Assistant Notification';
+                        document.getElementById('message').value = 'Movement in backyard detected';
+                        document.getElementById('attach').value = '/media/local/cam0_latest_detection.png';
+                        document.getElementById('attachment_compress_image').checked = true;
+                        document.getElementById('attachment_compress_image_value').value = '25';
+                        document.getElementById('attachment_compress_image_value').classList.remove('hidden');
+                        break;
+                        
+                    case '3':
+                        // Example 3: View action
+                        document.getElementById('title').value = 'Home Assistant Notification';
+                        document.getElementById('message').value = 'Movement in backyard detected';
+                        
+                        // Add an action
+                        addAction();
+                        setTimeout(() => {
+                            const actionItem = document.querySelector('.action-item');
+                            actionItem.querySelector('.action-type').value = 'view';
+                            actionItem.querySelector('.action-label').value = 'Open Home Assistant';
+                            actionItem.querySelector('.action-url').value = 'https://myhomassistant.domain.tld';
+                        }, 100);
+                        break;
+                        
+                    case '4':
+                        // Example 4: HTTP action
+                        document.getElementById('title').value = 'Home Assistant Notification';
+                        document.getElementById('message').value = 'Lights in living room turned off';
+                        
+                        // Add an action
+                        addAction();
+                        setTimeout(() => {
+                            const httpActionItem = document.querySelector('.action-item');
+                            httpActionItem.querySelector('.action-type').value = 'http';
+                            httpActionItem.querySelector('.action-label').value = 'Turn lights on';
+                            httpActionItem.querySelector('.action-method').value = 'POST';
+                            httpActionItem.querySelector('.action-url').value = 'https://https-address-of-ha/api/services/light/turn_on';
+                            httpActionItem.querySelector('.action-headers').value = '{"Authorization": "Bearer 1234567890abcde...", "Content-type": "application/json"}';
+                            httpActionItem.querySelector('.action-body').value = '{"entity_id": "light.living_room_lights"}';
+                            
+                            // Show HTTP fields
+                            const actionTypeSelect = httpActionItem.querySelector('.action-type');
+                            actionTypeSelect.dispatchEvent(new Event('change'));
+                        }, 100);
+                        break;
+                }
+                
+                // Generate the configuration
+                setTimeout(() => {
+                    generateConfiguration();
+                }, 200);
+            }, 100);
+        }
+    </script>
+</body>
+</html>

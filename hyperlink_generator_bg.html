@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Създаване на преки пътища</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f5ff;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .description {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .browser-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .browser-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            background-color: #f0f5ff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .browser-option:hover {
+            background-color: #e1ebff;
+        }
+        
+        .browser-option.selected {
+            background-color: #4a6ee0;
+            color: white;
+        }
+        
+        .icon-section {
+            margin-top: 30px;
+        }
+        
+        .icon-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .icon-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .icon-option:hover {
+            border-color: #4a6ee0;
+            background-color: #f8faff;
+        }
+        
+        .icon-option.selected {
+            border-color: #4a6ee0;
+            background-color: #e1ebff;
+        }
+        
+        .icon-option img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 5px;
+            object-fit: contain;
+        }
+        
+        .icon-option .icon-placeholder {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 5px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .custom-icon {
+            margin-top: 20px;
+        }
+        
+        .custom-icon input {
+            margin-top: 10px;
+        }
+        
+        .icon-link-input {
+            margin-top: 15px;
+        }
+        
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-next {
+            background-color: #4a6ee0;
+            color: white;
+        }
+        
+        .btn-next:hover {
+            background-color: #3a5ecf;
+        }
+        
+        .btn-cancel {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .btn-download {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background-color: #218838;
+        }
+        
+        .url-info {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .icon-label {
+            font-size: 12px;
+            text-align: center;
+            word-break: break-word;
+        }
+        
+        .current-icon {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #4a6ee0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Създаване на преки пътища</h1>
+        
+        <div class="description">
+            Този помощник ви помага да създадете преки пътища към локални или мрежови програми, файлове, папки, компютри или адреси в интернет.
+        </div>
+        
+        <div class="form-group">
+            <label for="name">Име на прекия път:</label>
+            <input type="text" id="name" placeholder="Въведете име за прекия път" value="Пряк път до сайт">
+        </div>
+        
+        <div class="form-group">
+            <label for="url">Въведете местоположението на елемента:</label>
+            <input type="text" id="url" placeholder="https://example.com" value="https://pasev.asuscomm.com/">
+            <div class="url-info">Въведете пълния URL адрес (включително http:// или https://)</div>
+        </div>
+        
+        <div class="form-group">
+            <label>Изберете браузър:</label>
+            <div class="browser-options">
+                <div class="browser-option selected" data-browser="universal">
+                    <span>Универсален</span>
+                </div>
+                <div class="browser-option" data-browser="edge">
+                    <span>Microsoft Edge</span>
+                </div>
+                <div class="browser-option" data-browser="chrome">
+                    <span>Google Chrome</span>
+                </div>
+                <div class="browser-option" data-browser="firefox">
+                    <span>Mozilla Firefox</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="icon-section">
+            <label>Изберете икона:</label>
+            <div class="icon-options" id="iconOptions">
+                <!-- Иконите ще се заредят тук чрез JavaScript -->
+            </div>
+            
+            <div class="custom-icon">
+                <label>Или добавете икона чрез линк:</label>
+                <div class="icon-link-input">
+                    <input type="text" id="iconLink" placeholder="https://example.com/icon.ico" style="width: 100%;">
+                    <button type="button" id="loadIconLink" style="margin-top: 8px; padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Зареди икона от линк
+                    </button>
+                </div>
+                
+                <label style="margin-top: 20px;">Или изберете локална икона:</label>
+                <input type="file" id="customIcon" accept=".ico,.png,.jpg,.jpeg,.svg">
+            </div>
+            
+            <div class="current-icon" id="currentIconInfo" style="display: none;">
+                <strong>Текуща икона:</strong>
+                <div id="selectedIconPreview"></div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn-cancel" id="cancelBtn">Отказ</button>
+            <button class="btn-download" id="downloadBtn">Изтегли хипервръзка</button>
+            <button class="btn-next" id="nextBtn">Напред</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedBrowser = 'universal';
+        let selectedIconPath = 'Y:\\PROJECT\\host\\static\\icons\\github1.ico';
+
+        // Локални икони от /static/icons/ директорията
+        const localIcons = [
+            { name: "GitHub", path: "Y:\\PROJECT\\host\\static\\icons\\github1.ico", url: "/static/icons/github1.ico" },
+            { name: "Chrome", path: "Y:\\PROJECT\\host\\static\\icons\\chrome.ico", url: "/static/icons/chrome.ico" },
+            { name: "Firefox", path: "Y:\\PROJECT\\host\\static\\icons\\firefox.ico", url: "/static/icons/firefox.ico" },
+            { name: "Edge", path: "Y:\\PROJECT\\host\\static\\icons\\edge.ico", url: "/static/icons/edge.ico" },
+            { name: "Сайт", path: "Y:\\PROJECT\\host\\static\\icons\\website.ico", url: "/static/icons/website.ico" },
+            { name: "Папка", path: "Y:\\PROJECT\\host\\static\\icons\\folder.ico", url: "/static/icons/folder.ico" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLocalIcons();
+            setupBrowserSelection();
+            setupDownloadButton();
+            setupOtherButtons();
+            setupIconSelection();
+            updateIconPreview();
+        });
+
+        function loadLocalIcons() {
+            const iconOptionsContainer = document.getElementById('iconOptions');
+            
+            localIcons.forEach((icon, index) => {
+                const iconOption = document.createElement('div');
+                iconOption.className = 'icon-option';
+                if (index === 0) {
+                    iconOption.classList.add('selected');
+                }
+                iconOption.dataset.iconPath = icon.path;
+                
+                const iconImg = document.createElement('img');
+                iconImg.src = icon.url;
+                iconImg.alt = icon.name;
+                iconImg.onerror = function() {
+                    // Ако иконата не се зареди, показваме placeholder
+                    this.style.display = 'none';
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'icon-placeholder';
+                    placeholder.textContent = '📄';
+                    iconOption.insertBefore(placeholder, this.nextSibling);
+                };
+                
+                const iconLabel = document.createElement('span');
+                iconLabel.className = 'icon-label';
+                iconLabel.textContent = icon.name;
+                
+                iconOption.appendChild(iconImg);
+                iconOption.appendChild(iconLabel);
+                
+                iconOption.addEventListener('click', function() {
+                    selectIcon(this);
+                });
+                
+                iconOptionsContainer.appendChild(iconOption);
+            });
+        }
+
+        function setupIconSelection() {
+            // Бутон за зареждане на икона от линк
+            document.getElementById('loadIconLink').addEventListener('click', function() {
+                const iconLink = document.getElementById('iconLink').value.trim();
+                if (iconLink) {
+                    selectedIconPath = iconLink;
+                    updateIconPreview();
+                    
+                    // Премахваме селекцията от локалните икони
+                    document.querySelectorAll('.icon-option').forEach(icon => {
+                        icon.classList.remove('selected');
+                    });
+                }
+            });
+
+            // Качване на локална икона
+            document.getElementById('customIcon').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Запазваме само пътя към файла, не съдържанието
+                    selectedIconPath = file.name;
+                    updateIconPreview();
+                    
+                    // Премахваме селекцията от локалните икони
+                    document.querySelectorAll('.icon-option').forEach(icon => {
+                        icon.classList.remove('selected');
+                    });
+                }
+            });
+        }
+
+        function selectIcon(iconElement) {
+            // Премахване на селекцията от всички икони
+            document.querySelectorAll('.icon-option').forEach(icon => {
+                icon.classList.remove('selected');
+            });
+            
+            // Добавяне на селекция към избраната икона
+            iconElement.classList.add('selected');
+            
+            // Запазване на избраната икона
+            selectedIconPath = iconElement.dataset.iconPath;
+            
+            // Нулиране на другите полета за икони
+            document.getElementById('iconLink').value = '';
+            document.getElementById('customIcon').value = '';
+            
+            updateIconPreview();
+        }
+
+        function updateIconPreview() {
+            const currentIconInfo = document.getElementById('currentIconInfo');
+            const selectedIconPreview = document.getElementById('selectedIconPreview');
+            
+            if (selectedIconPath) {
+                currentIconInfo.style.display = 'block';
+                
+                // Проверяваме дали е линк или локален файл
+                if (selectedIconPath.startsWith('http')) {
+                    selectedIconPreview.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <img src="${selectedIconPath}" width="32" height="32" alt="Икона" style="border-radius: 4px;">
+                            <div>
+                                <div><strong>Външна икона</strong></div>
+                                <div style="font-size: 12px; color: #666; word-break: break-all;">${selectedIconPath}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Намираме името на иконата от пътя
+                    const iconName = selectedIconPath.split('\\').pop() || selectedIconPath.split('/').pop();
+                    selectedIconPreview.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <div style="width: 32px; height: 32px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 18px;">📄</div>
+                            <div>
+                                <div><strong>Локална икона</strong></div>
+                                <div style="font-size: 12px; color: #666;">${iconName}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                currentIconInfo.style.display = 'none';
+            }
+        }
+
+        function setupBrowserSelection() {
+            const browserOptions = document.querySelectorAll('.browser-option');
+            browserOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    browserOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedBrowser = this.dataset.browser;
+                });
+            });
+        }
+
+        function setupDownloadButton() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            downloadBtn.addEventListener('click', function() {
+                const url = document.getElementById('url').value;
+                const name = document.getElementById('name').value || 'Пряк път';
+                
+                if (!url) {
+                    alert('Моля, въведете URL адрес!');
+                    return;
+                }
+
+                let fullUrl = url;
+
+                switch(selectedBrowser) {
+                    case 'edge':
+                        fullUrl = `microsoft-edge:${url}`;
+                        break;
+                    case 'chrome':
+                        fullUrl = `googlechrome:${url}`;
+                        break;
+                    case 'firefox':
+                        fullUrl = `firefox:${url}`;
+                        break;
+                }
+
+                // Създаваме .url файл с избраната икона
+                const urlContent =
+`[InternetShortcut]
+URL=${fullUrl}
+IconFile=${selectedIconPath}
+IconIndex=0
+`;
+
+                const blob = new Blob([urlContent], { type: 'text/plain' });
+                const downloadUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `${name.replace(/[^a-zA-Z0-9а-яА-Я\s]/g, '')}.url`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+            });
+        }
+
+        function setupOtherButtons() {
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                if (confirm('Наистина ли искате да откажете създаването на прекия път?')) {
+                    document.getElementById('name').value = 'Пряк път до сайт';
+                    document.getElementById('url').value = 'https://pasev.asuscomm.com/';
+                    document.getElementById('iconLink').value = '';
+                    document.getElementById('customIcon').value = '';
+                    
+                    // Връщане към първата икона
+                    document.querySelectorAll('.icon-option').forEach(icon => {
+                        icon.classList.remove('selected');
+                    });
+                    document.querySelector('.icon-option').classList.add('selected');
+                    selectedIconPath = localIcons[0].path;
+                    updateIconPreview();
+                }
+            });
+            
+            document.getElementById('nextBtn').addEventListener('click', function() {
+                if (!document.getElementById('url').value) {
+                    alert('Моля, въведете URL адрес преди да продължите!');
+                    return;
+                }
+                
+                alert('Прекият път е готов! Можете да го изтеглите с бутона "Изтегли хипервръзка".');
+            });
+        }
+    </script>
+</body>
+</html>
